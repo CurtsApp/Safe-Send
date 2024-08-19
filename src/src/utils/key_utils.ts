@@ -10,3 +10,4 @@ export enum KeyType {
                     namedCurve: "P-384" */
 }
 
+export const AES_0_NONCE_SIZE = 12;

@@ -3,6 +3,9 @@ import { useState } from "react";
 import { User } from "../interfaces/User";
 import { DecryptFile, EncryptFile, SignFile, VerifyFile } from "../utils/crypto_utils";
 import { Contact } from "../interfaces/Contact";
+import { GetContactFromUser } from "../utils/user_utils";
+import { writeBinaryFile } from "@tauri-apps/api/fs";
+import { sep } from "@tauri-apps/api/path";
 
 interface PackagingEditorProps {
     user: User | undefined,
@@ -61,16 +64,28 @@ export function PackagingEditor(props: PackagingEditorProps) {
             return;
         }
 
-        inputFiles.forEach(async file => {
-            const path = await save({
-                title: file,
-                defaultPath: file
-            });
+        inputFiles.forEach(async file => {          
+            if (props.user) {
+                DecryptFile(file, props.user).then(async (fileDetails) => {
+                    let splitPath = file.split(sep);
+                    // Remove file name
+                    splitPath = splitPath.splice(-1);
+                    // Add new file name
+                    splitPath.push(fileDetails.fileName);
+                    const pathToNewFile = splitPath.join(sep);
 
-            if (path && props.user) {
-                // @ts-ignore
-                let contactsToDecryptFor = selectedContacts.map(selIdx => props.user.contacts[selIdx]);
-                DecryptFile(file, path, contactsToDecryptFor[0], props.user)
+                    const path = await save({
+                        title: `Decrypting ${file}`,
+                        defaultPath: pathToNewFile
+                    });
+
+                    if(path) {
+                        writeBinaryFile(path, fileDetails.decryptedFile);
+                    }
+
+                }).catch(reason => {
+                    // TODO handle failing to decrypt file
+                })
             }
         });
 
