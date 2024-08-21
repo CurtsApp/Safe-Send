@@ -1,11 +1,11 @@
 import { dialog } from "@tauri-apps/api";
 import { ask, message, open, save } from "@tauri-apps/api/dialog";
-import { FileEntry, readDir, renameFile } from "@tauri-apps/api/fs";
+import { FileEntry, readDir } from "@tauri-apps/api/fs";
 import { useRef, useState } from "react";
 import { User } from "../interfaces/User";
 import { GenerateEncryptionKey, GenerateSigningKey } from "../utils/crypto_utils";
 import { getFirstString, stringSort } from "../utils/general_utils";
-import { DeleteFile, GetUserFromPath, SaveUser, USER_PROFILE_BASE_DIR, USER_PROFILE_DIR, VerifyUserProfilesDirectoryExists } from "../utils/user_utils";
+import { DeleteFile, GetUserFromPath, GetUserProfilePath, SaveUser, USER_PROFILE_BASE_DIR, USER_PROFILE_DIR } from "../utils/user_utils";
 
 interface UserEditorProps {
     user: User | undefined,
@@ -96,7 +96,7 @@ export function UserEditor(props: UserEditorProps) {
 
     function attemptLogIn(userName: string, password: string) {
         if (userName) {
-            const userFilePath = getUserProfilePath(userName);
+            const userFilePath = GetUserProfilePath(userName);
 
             // TODO validate password/encrypt .up files
 
@@ -126,24 +126,11 @@ export function UserEditor(props: UserEditorProps) {
     }
 
     function updateUserData(user: User) {
-        VerifyUserProfilesDirectoryExists();
-
-        // Default to "old" username, if none then use provided name. This allows the creation of new user profiles.
-        let userFileName = props.user === undefined ? user.name : props.user.name;
-        // Save first using potentially old file name
-        SaveUser(user, getUserProfilePath(userFileName), USER_PROFILE_BASE_DIR).then(() => {
-            if (props.user && user.name !== props.user.name) {
-                // Rename stored file
-                // TODO handle file name collision, don't DELETE ANYONES KEYS
-                renameFile(getUserProfilePath(props.user.name), getUserProfilePath(user.name), USER_PROFILE_BASE_DIR);
-            }
-        });
+        
         props.updateUser(user);
     }
 
-    function getUserProfilePath(userName: string) {
-        return `${USER_PROFILE_DIR}/${userName}.up`
-    }
+
 
     async function createNewUserProfile() {
         let signingKey = await GenerateSigningKey();
@@ -196,7 +183,7 @@ export function UserEditor(props: UserEditorProps) {
             { okLabel: "Delete User", cancelLabel: "Cancel", title: `Delete ${props.user?.name}` })
             .then(confirmed => {
                 if (confirmed && props.user) {
-                    DeleteFile(getUserProfilePath(props.user.name), USER_PROFILE_BASE_DIR);
+                    DeleteFile(GetUserProfilePath(props.user.name), USER_PROFILE_BASE_DIR);
                     logOut();
                 }
             })

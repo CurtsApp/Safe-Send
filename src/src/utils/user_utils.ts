@@ -114,3 +114,7 @@ export async function VerifyUserProfilesDirectoryExists() {
         createDir(USER_PROFILE_DIR, USER_PROFILE_BASE_DIR);
     }
 }
+
+export function GetUserProfilePath(userName: string) {
+    return `${USER_PROFILE_DIR}/${userName}.up`
+}
