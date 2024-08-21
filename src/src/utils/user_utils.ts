@@ -55,7 +55,7 @@ export function GetUserFromPath(path: string, fsOptions?: FsOptions): Promise<Re
                                 hash: "SHA-256"
                             },
                             true,
-                            ["encrypt"]
+                            ["encrypt", "wrapKey"]
                         ),
                         privateKey: await crypto.subtle.importKey(
                             "jwk",
@@ -65,7 +65,7 @@ export function GetUserFromPath(path: string, fsOptions?: FsOptions): Promise<Re
                                 hash: "SHA-256"
                             },
                             true,
-                            ["decrypt"]
+                            ["decrypt", "unwrapKey"]
                         )
                     },
                     signingKeys: {

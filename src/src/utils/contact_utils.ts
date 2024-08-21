@@ -45,7 +45,7 @@ export async function GetContact(savedContact: SavedContact): Promise<Contact> {
                     hash: "SHA-256"
                 },
                 true,
-                ["encrypt"]
+                ["encrypt", "wrapKey"]
             )
 
     }

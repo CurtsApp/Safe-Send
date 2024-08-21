@@ -6,6 +6,7 @@ import { Contact } from "../interfaces/Contact";
 import { GetContactFromUser } from "../utils/user_utils";
 import { writeBinaryFile } from "@tauri-apps/api/fs";
 import { sep } from "@tauri-apps/api/path";
+import { EFFormat } from "../utils/key_utils";
 
 interface PackagingEditorProps {
     user: User | undefined,
@@ -51,11 +52,11 @@ export function PackagingEditor(props: PackagingEditorProps) {
             title: "Output File"
         });
 
-        if (path) {
+        if (props.user && path) {
             // @ts-ignore
             let contactsToEncryptFor = selectedContacts.map(selIdx => props.user.contacts[selIdx]);
             contactsToEncryptFor = contactsToEncryptFor.filter(contact => contact !== undefined);
-            EncryptFile(inputFiles[0], path, contactsToEncryptFor);
+            EncryptFile(EFFormat.V0, inputFiles[0], path, contactsToEncryptFor, props.user);
         }
     }
 
@@ -64,9 +65,13 @@ export function PackagingEditor(props: PackagingEditorProps) {
             return;
         }
 
-        inputFiles.forEach(async file => {          
+        inputFiles.forEach(async file => {
             if (props.user) {
-                DecryptFile(file, props.user).then(async (fileDetails) => {
+                // @ts-ignore
+                let contactsToDecryptFor = selectedContacts.map(selIdx => props.user.contacts[selIdx]);
+                contactsToDecryptFor = contactsToDecryptFor.filter(contact => contact !== undefined);
+
+                DecryptFile(EFFormat.V0, file, contactsToDecryptFor[0], props.user).then(async (fileDetails) => {
                     let splitPath = file.split(sep);
                     // Remove file name
                     splitPath = splitPath.splice(-1);
@@ -79,7 +84,7 @@ export function PackagingEditor(props: PackagingEditorProps) {
                         defaultPath: pathToNewFile
                     });
 
-                    if(path) {
+                    if (path) {
                         writeBinaryFile(path, fileDetails.decryptedFile);
                     }
 
