@@ -1,9 +1,8 @@
-import { useState } from "react";
-import { Contact } from "../interfaces/Contact";
 import { ask, message, open, save } from "@tauri-apps/api/dialog";
+import { Contact } from "../interfaces/Contact";
+import { User } from "../interfaces/User";
 import { ExportContact, GetContactFromPath } from "../utils/contact_utils";
 import { getFirstString, stringSort } from "../utils/general_utils";
-import { User } from "../interfaces/User";
 import { GetContactFromUser } from "../utils/user_utils";
 
 interface ContactsEditorProps {
@@ -18,7 +17,6 @@ export function ContactsEditor(props: ContactsEditorProps) {
 
     // Updating the user will trigger re-render, so this isn't state
     let contacts = [...props.user.contacts];
-
 
     const handleDeleteContact = (listIdx: number) => {
         ask(`Are you sure you want to delete '${contacts[listIdx].name}'?`,

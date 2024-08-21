@@ -16,7 +16,7 @@ function App() {
     setUserProfile((prevUser) => {
       if (prevUser) {
         prevUser.contacts = newContacts;
-        return prevUser;
+        return { ...prevUser };
       }
     })
   }}></ContactsEditor>
