@@ -3,6 +3,7 @@ export interface Contact {
     note?: string;
 
     publicEncryptionKey: CryptoKey;
+    publicSigningKey: CryptoKey;
 }
 
 export interface SavedContact {
@@ -10,4 +11,5 @@ export interface SavedContact {
     note?: string;
 
     publicEncryptionKey: JsonWebKey;
+    publicSigningKey: JsonWebKey;
 }

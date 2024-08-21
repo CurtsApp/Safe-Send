@@ -28,7 +28,11 @@ export async function GetSavedContact(contact: Contact): Promise<SavedContact> {
         publicEncryptionKey: await crypto.subtle.exportKey(
             "jwk",
             contact.publicEncryptionKey
-        )
+        ),
+        publicSigningKey: await crypto.subtle.exportKey(
+            "jwk",
+            contact.publicSigningKey
+        ),
     }
 }
 
@@ -46,7 +50,18 @@ export async function GetContact(savedContact: SavedContact): Promise<Contact> {
                 },
                 true,
                 ["encrypt", "wrapKey"]
-            )
+            ),
+        publicSigningKey:
+            await crypto.subtle.importKey(
+                "jwk",
+                savedContact.publicSigningKey,
+                {
+                    name: "ECDSA",
+                    namedCurve: "P-384"
+                },
+                true,
+                ["verify"]
+            ),
 
     }
 }

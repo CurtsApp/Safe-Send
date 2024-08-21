@@ -73,14 +73,14 @@ export async function EF_V0_EncryptFile(binInputFile: Uint8Array, fileName: stri
         aesPayload[payloadOffset] = binInputFile[i];
     }
 
-    // Sign file data
+    // Sign file data, not including signature
     const aesPayloadSignature = new Uint8Array(await window.crypto.subtle.sign(
         {
             name: "ECDSA",
             hash: { name: "SHA-256" },
         },
         user.signingKeys.privateKey,
-        binInputFile
+        aesPayload.subarray(0, aesPayload.byteLength - ECDSA_SIG_LEN)
     ));
 
     // Set payload signature
@@ -224,13 +224,12 @@ export async function EF_V0_DecryptFile(binInputFile: Uint8Array, expectedSender
             }
 
             // Validate full file signature
-            // TODO need contact signing public key
-            // const fullFileWasValid = VerifyBin(binInputFile, expectedSender.publicEncryptionKey);
-
+            const fullFileWasValid = await VerifyBin(binInputFile, expectedSender.publicSigningKey);
             // Validate aes decrypted signature
+            const decryptedAesPayloadWasValid = await VerifyBin(decryptedAesPortion, expectedSender.publicSigningKey);
 
             // File was successfully decrypted
-            resolve({ decryptedFile: fileBin, fileName: fileName, passedSignatureValidation: true });
+            resolve({ decryptedFile: fileBin, fileName: fileName, passedSignatureValidation: fullFileWasValid && decryptedAesPayloadWasValid });
         } else {
             reject("Message did not pass integrity validation.");
             return;

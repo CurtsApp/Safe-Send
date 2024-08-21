@@ -1,59 +1,25 @@
-import { readBinaryFile, writeBinaryFile } from "@tauri-apps/api/fs";
+import { readBinaryFile } from "@tauri-apps/api/fs";
 import { sep } from "@tauri-apps/api/path";
 import { Contact } from "../interfaces/Contact";
 import { User } from "../interfaces/User";
 import { EF_V0_DecryptFile, EF_V0_EncryptFile } from "./EF_V0_utils";
-import { decodeBytesToJSON, getUint32FromOffset, hasAllKeys } from "./general_utils";
 import { AES_CTR_NONCE_SIZE, EFFormat } from "./key_utils";
 
-export const ECDSA_SIG_LEN = 96;
-
-export function SignFile(inputFilePath: string, outputFilePath: string, privateKey: CryptoKey) {
-    return new Promise<boolean>((resolve, reject) => {
-        readBinaryFile(inputFilePath).then(binInputFile => {
-            window.crypto.subtle.sign(
-                {
-                    name: "ECDSA",
-                    hash: { name: "SHA-256" },
-                },
-                privateKey,
-                binInputFile
-            ).then(signedInputFile => {
-                if (signedInputFile.byteLength !== SIGNATURE_LENGTH) {
-                    reject(`Invalid signature length ${signedInputFile.byteLength}`);
-                } else {
-                    // Copy original file
-                    writeBinaryFile(outputFilePath, binInputFile).then(() => {
-                        // Append signature to the end
-                        writeBinaryFile(outputFilePath, signedInputFile, { append: true }).then(() => resolve(true));
-                    })
-                }
-
-            })
-        })
-    });
-}
-
 // Input .sf file, is the decrypted original payload with the signature appended to the end
-// Signature is always 96 bytes
-const SIGNATURE_LENGTH = 96;
 export function VerifyBin(inputBin: Uint8Array, publicKey: CryptoKey) {
-    const endOfFile = inputBin.length - SIGNATURE_LENGTH;
+    const endOfFile = inputBin.length - ECDSA_SIG_LEN;
     const decryptedOriginalFile = inputBin.subarray(0, endOfFile);
     const signature = inputBin.subarray(endOfFile);
     return window.crypto.subtle.verify(
         {
             name: "ECDSA",
-            hash: { name: "SHA-256" },
+            hash: "SHA-256",
         },
         publicKey,
         signature,
         decryptedOriginalFile
     );
 }
-
-
-
 
 export async function EncryptFile(fileFormat: EFFormat, inputFilePath: string, outputFilePath: string, recipients: Contact[], user: User) {
     let pathSplit = inputFilePath.split(sep);
@@ -80,6 +46,8 @@ export async function DecryptFile(fileFormat: EFFormat, inputFilePath: string, e
     }
 }
 
+// ECDSA Signature length is always 96 bytes with current key parameters
+export const ECDSA_SIG_LEN = 96;
 export function GenerateSigningKey() {
     return window.crypto.subtle.generateKey(
         {

@@ -1,11 +1,10 @@
 import { open, save } from "@tauri-apps/api/dialog";
-import { useState } from "react";
-import { User } from "../interfaces/User";
-import { DecryptFile, EncryptFile, SignFile, VerifyFile } from "../utils/crypto_utils";
-import { Contact } from "../interfaces/Contact";
-import { GetContactFromUser } from "../utils/user_utils";
 import { writeBinaryFile } from "@tauri-apps/api/fs";
 import { sep } from "@tauri-apps/api/path";
+import { useState } from "react";
+import { Contact } from "../interfaces/Contact";
+import { User } from "../interfaces/User";
+import { DecryptFile, EncryptFile } from "../utils/crypto_utils";
 import { EFFormat } from "../utils/key_utils";
 
 interface PackagingEditorProps {
@@ -17,25 +16,6 @@ export function PackagingEditor(props: PackagingEditorProps) {
     const [selectedContacts, setSelectedContacts] = useState<number[]>([]);
 
     const noFilesSelected = !inputFiles || inputFiles.length === 0;
-    const signSelFiles = async () => {
-        if (noFilesSelected || !props.user?.signingKeys) {
-            return;
-        }
-
-        const path = await save({
-            filters: [
-                {
-                    name: 'Signed File',
-                    extensions: ["sf"],
-                },
-            ],
-            title: "Output File"
-        });
-
-        if (path) {
-            SignFile(inputFiles[0], path, props.user.signingKeys.privateKey)
-        }
-    }
 
     const encryptSelFiles = async () => {
         if (noFilesSelected || !props.user?.encryptionKeys) {
@@ -96,31 +76,6 @@ export function PackagingEditor(props: PackagingEditorProps) {
 
     }
 
-    const verifySelFiles = async () => {
-        if (!props.user?.encryptionKeys) {
-            return;
-        }
-
-        const path = await open({
-            filters: [
-                {
-                    name: 'Signed File',
-                    extensions: ["sf"],
-                },
-            ],
-            title: "Verify File"
-        });
-
-        if (path) {
-            if (Array.isArray(path)) {
-                // TODO verify multiple files at the same time
-                //VerifyFile(path[0], props.user.signingKeys.publicKey).then(res => setSuc(res))
-            } else {
-                //VerifyFile(path, props.user.signingKeys.publicKey).then(res => setSuc(res))
-            }
-        }
-    }
-
     const getFileList = () => {
         if (noFilesSelected) {
             return;
@@ -158,7 +113,6 @@ export function PackagingEditor(props: PackagingEditorProps) {
             </ul>
         )
     }
-
 
     return (
         <div className="column" style={{ width: "100%" }}>
@@ -214,6 +168,5 @@ function ContactRow(props: ContactRowProps) {
                 <input type="checkbox" checked={props.isSelected} onChange={() => props.setSelected(!props.isSelected)}></input>
             </div>
         </div>
-
     )
 }
