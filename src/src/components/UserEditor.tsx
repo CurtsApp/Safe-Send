@@ -13,7 +13,6 @@ interface UserEditorProps {
 }
 
 export function UserEditor(props: UserEditorProps) {
-    // TODO get all user profiles and list them for login options
     const [profiles, setProfiles] = useState<FileEntry[]>();
     const [profilesUpdating, setProfilesUpdating] = useState(false);
     const [loggingInUser, setLoggingInUser] = useState("");
@@ -38,9 +37,9 @@ export function UserEditor(props: UserEditorProps) {
         return (
             <div className="column">
                 <div className="outlineContainer">
-                    <div>Log In</div>
+                    <div>User Profiles - Log in</div>
                     <div className="column">
-                        {profiles ?
+                        {profiles && profiles.length > 0 ?
                             profiles.map(profile => <button id={profile.name} onClick={() => setLoggingInUser(profile.name?.split(".")[0] || "")}>{profile.name}</button>)
                             : undefined}
                     </div>

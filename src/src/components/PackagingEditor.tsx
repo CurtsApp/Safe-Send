@@ -6,6 +6,7 @@ import { Contact } from "../interfaces/Contact";
 import { User } from "../interfaces/User";
 import { DecryptFile, EncryptFile } from "../utils/crypto_utils";
 import { EFFormat } from "../utils/key_utils";
+import { LabeledOutlineContainer } from "./LabeledOutlineContainer";
 
 interface PackagingEditorProps {
     user: User | undefined,
@@ -142,11 +143,9 @@ export function PackagingEditor(props: PackagingEditorProps) {
                 <button onClick={() => encryptSelFiles()} disabled={noFilesSelected}>Encrypt</button>
                 <button onClick={() => decryptSelFiles()} disabled={noFilesSelected}>Decrypt</button>
             </div>
-            <div className="outlineContainer">
-                <div>Contacts to encrypt for</div>
+            <LabeledOutlineContainer label="Contacts to encrypt for">
                 {getContactList()}
-            </div>
-
+            </LabeledOutlineContainer>
         </div>
     );
 }

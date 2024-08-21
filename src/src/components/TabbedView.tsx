@@ -5,10 +5,11 @@ interface TabbedViewProps {
     tabViews: (JSX.Element | undefined)[];
     contextIcon?: JSX.Element;
     pressIconSetsTabToIdx?: number;
+    initalTabIdx?: number;
 }
 
 export function TabbedView(props: TabbedViewProps) {
-    const [selTabIdx, setSelTabIdx] = useState(0);
+    const [selTabIdx, setSelTabIdx] = useState(props.initalTabIdx === undefined ? 0 : props.initalTabIdx );
 
     return (
         <div className="column">

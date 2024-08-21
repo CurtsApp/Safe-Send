@@ -55,6 +55,7 @@ function App() {
         ]}
         contextIcon={contextIcon}
         pressIconSetsTabToIdx={1}
+        initalTabIdx={1}
       />
     </div>
   );
