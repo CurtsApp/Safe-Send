@@ -39,6 +39,7 @@
       {
         "title": "Safe Send",
         "width": 800,
+        "minWidth": 500,
         "height": 600
       }
     ],

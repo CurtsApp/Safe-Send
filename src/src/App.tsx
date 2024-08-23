@@ -8,6 +8,7 @@ import { ContactsEditor } from "./components/ContactsEditor";
 import { Contact } from "./interfaces/Contact";
 import { GetUserProfilePath, SaveUser, USER_PROFILE_BASE_DIR, VerifyUserProfilesDirectoryExists } from "./utils/user_utils";
 import { renameFile } from "@tauri-apps/api/fs";
+import { DecryptEditor } from "./components/DecryptEditor";
 
 function App() {
   const [userProfile, setUserProfile] = useState<User>();
@@ -35,6 +36,7 @@ function App() {
 
   const manageProfileView = <UserEditor user={userProfile} updateUser={updateUser}></UserEditor>;
   const packageFileView = <PackagingEditor user={userProfile}></PackagingEditor>
+  const decryptFileView = <DecryptEditor user={userProfile}></DecryptEditor>
   const contactsView = <ContactsEditor user={userProfile} updateContacts={(newContacts: Contact[]) => {
     if (userProfile !== undefined) {
       updateUser({ ...userProfile, contacts: newContacts });
@@ -47,15 +49,16 @@ function App() {
   return (
     <div className="container">
       <TabbedView
-        tabs={["Package Files", "Manage Profile", "Contacts"]}
+        tabs={["Encrypt", "Decrypt", "Manage Profile", "Contacts"]}
         tabViews={[
           packageFileView,
+          decryptFileView,
           manageProfileView,
           contactsView
         ]}
         contextIcon={contextIcon}
-        pressIconSetsTabToIdx={1}
-        initalTabIdx={1}
+        pressIconSetsTabToIdx={2}
+        initalTabIdx={2}
       />
     </div>
   );

@@ -11,6 +11,8 @@
   line-height: 24px;
   font-weight: 400;
 
+  min-width: 500px;
+
   color: #0f0f0f;
   background-color: #f6f6f6;
 
@@ -201,4 +203,12 @@ button {
 
 .maxContentWidth {
   max-width: max-content;
+}
+
+.interactive {
+  cursor: pointer;
+}
+
+.interactive:hover {
+  background-color: lightblue;
 }

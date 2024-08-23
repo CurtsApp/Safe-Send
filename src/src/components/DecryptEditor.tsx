@@ -4,43 +4,54 @@ import { sep } from "@tauri-apps/api/path";
 import { useState } from "react";
 import { Contact } from "../interfaces/Contact";
 import { User } from "../interfaces/User";
-import { DecryptFile, EncryptFile } from "../utils/crypto_utils";
+import { DecryptFile } from "../utils/crypto_utils";
 import { EFFormat } from "../utils/key_utils";
 import { LabeledOutlineContainer } from "./LabeledOutlineContainer";
 import { GetContactFromUser } from "../utils/user_utils";
 
-interface PackagingEditorProps {
+interface DecryptEditorProps {
     user: User | undefined,
 }
 
-export function PackagingEditor(props: PackagingEditorProps) {
+export function DecryptEditor(props: DecryptEditorProps) {
     const [inputFiles, setInputFiles] = useState<string[]>([]);
-    const [selectedContacts, setSelectedContacts] = useState<number[]>([]);
+    const [selectedContact, setselectedContact] = useState<number | undefined>(undefined);
 
     const noFilesSelected = !inputFiles || inputFiles.length === 0;
-    const noContactSelected = selectedContacts.length === 0;
+    const noContactSelected = selectedContact === undefined;
 
-    const encryptSelFiles = async () => {
+    const decryptSelFiles = () => {
         if (noFilesSelected || !props.user?.encryptionKeys) {
             return;
         }
 
-        const path = await save({
-            filters: [
-                {
-                    name: 'Safe File',
-                    extensions: ["ef"],
-                },
-            ],
-            title: "Output File"
+        inputFiles.forEach(async file => {
+            if (props.user && selectedContact !== undefined) {
+                let contactsToDecryptFor = props.user.contacts[selectedContact]
+
+                DecryptFile(EFFormat.V0, file, contactsToDecryptFor, props.user).then(async (fileDetails) => {
+                    let splitPath = file.split(sep);
+                    // Remove file name
+                    splitPath = splitPath.splice(-1);
+                    // Add new file name
+                    splitPath.push(fileDetails.fileName);
+                    const pathToNewFile = splitPath.join(sep);
+
+                    const path = await save({
+                        title: `Decrypting ${file}`,
+                        defaultPath: pathToNewFile
+                    });
+
+                    if (path) {
+                        writeBinaryFile(path, fileDetails.decryptedFile);
+                    }
+
+                }).catch(reason => {
+                    // TODO handle failing to decrypt file
+                })
+            }
         });
 
-        if (props.user && path) {
-            // @ts-ignore
-            let contactsToEncryptFor = selectedContacts.map(selIdx => props.user.contacts[selIdx]);
-            contactsToEncryptFor = contactsToEncryptFor.filter(contact => contact !== undefined);
-            EncryptFile(EFFormat.V0, inputFiles[0], path, contactsToEncryptFor, props.user);
-        }
     }
 
     const getFileList = () => {
@@ -68,15 +79,12 @@ export function PackagingEditor(props: PackagingEditorProps) {
                     <li id={`${contact.name}-${contact.note}`}>
                         <ContactRow
                             contact={contact}
-                            isSelected={selectedContacts.find((contactIdx) => contactIdx === idx) !== undefined}
+                            isSelected={selectedContact === idx}
                             setSelected={(newSelection) => {
                                 if (newSelection) {
-                                    selectedContacts.push(idx);
-                                    setSelectedContacts([...selectedContacts]);
+                                    setselectedContact(idx);
                                 } else {
-                                    let idxToRemove = selectedContacts.findIndex((contactIdx) => contactIdx === idx);
-                                    selectedContacts.splice(idxToRemove, 1);
-                                    setSelectedContacts([...selectedContacts]);
+                                    setselectedContact(undefined);
                                 }
                             }}
                         />
@@ -111,12 +119,12 @@ export function PackagingEditor(props: PackagingEditorProps) {
                 </div>
             </LabeledOutlineContainer>
             <div className="column" style={{ width: "100%" }}>
-                <LabeledOutlineContainer label="Encrypt Files For">
+                <LabeledOutlineContainer label="Expected File Sender">
                     {getContactList()}
                 </LabeledOutlineContainer>
             </div>
             <div className="row">
-                <button onClick={() => encryptSelFiles()} disabled={noFilesSelected || noContactSelected}>Encrypt</button>
+                <button onClick={() => decryptSelFiles()} disabled={noFilesSelected || noContactSelected}>Decrypt</button>
             </div>
         </div>
     );
@@ -130,7 +138,9 @@ interface ContactRowProps {
 
 function ContactRow(props: ContactRowProps) {
     return (
-        <div className="row interactive" style={{ justifyContent: "space-between" }} onClick={() => props.setSelected(!props.isSelected)}>
+        <div className="row interactive" style={{ justifyContent: "space-between" }} onClick={() => {
+            props.setSelected(!props.isSelected)
+        }}>
             <div className="column">
                 <div>{props.contact.name}</div>
                 {props.contact.note !== undefined && props.contact.note.trim() !== "" ? <div><i>props.contact.note</i></div> : undefined}
