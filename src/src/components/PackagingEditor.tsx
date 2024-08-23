@@ -79,7 +79,7 @@ export function PackagingEditor(props: PackagingEditorProps) {
 
     const getFileList = () => {
         if (noFilesSelected) {
-            return;
+            return <li>No files selected</li>
         }
 
         return (
@@ -117,35 +117,38 @@ export function PackagingEditor(props: PackagingEditorProps) {
 
     return (
         <div className="column" style={{ width: "100%" }}>
-            <div className="column outlineContainer">
-                <ul style={{ minHeight: "100px" }}>
-                    {getFileList()}
-                </ul>
-                <button onClick={async () => {
-                    const selected = await open({
-                        multiple: true
-                    });
+            <LabeledOutlineContainer label="Selected Files" fitContentWidth={false}>
+                <div className="column">
+                    <ul style={{ minHeight: "100px" }}>
+                        {getFileList()}
+                    </ul>
+                    <button onClick={async () => {
+                        const selected = await open({
+                            multiple: true
+                        });
 
-                    if (Array.isArray(selected)) {
-                        // user selected multiple files
-                        setInputFiles(selected);
-                    } else if (selected === null) {
-                        // user cancelled the selection
-                        setInputFiles([]);
-                    } else {
-                        // user selected a single file
-                        setInputFiles([selected]);
-                    }
-                }}>Select Files</button>
+                        if (Array.isArray(selected)) {
+                            // user selected multiple files
+                            setInputFiles(selected);
+                        } else if (selected === null) {
+                            // user cancelled the selection
+                            setInputFiles([]);
+                        } else {
+                            // user selected a single file
+                            setInputFiles([selected]);
+                        }
+                    }}>Browse</button>
+                </div>
+            </LabeledOutlineContainer>
+            <div className="column" style={{width: "100%"}}>
+                <LabeledOutlineContainer label="Contacts to encrypt for">
+                    {getContactList()}
+                </LabeledOutlineContainer>
             </div>
-
             <div className="row">
                 <button onClick={() => encryptSelFiles()} disabled={noFilesSelected}>Encrypt</button>
                 <button onClick={() => decryptSelFiles()} disabled={noFilesSelected}>Decrypt</button>
             </div>
-            <LabeledOutlineContainer label="Contacts to encrypt for">
-                {getContactList()}
-            </LabeledOutlineContainer>
         </div>
     );
 }
