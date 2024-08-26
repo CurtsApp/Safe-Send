@@ -59,6 +59,7 @@ function App() {
         contextIcon={contextIcon}
         pressIconSetsTabToIdx={2}
         initalTabIdx={2}
+        lockToTab={userProfile === undefined ? 2 : undefined}
       />
     </div>
   );

@@ -6,10 +6,14 @@ interface TabbedViewProps {
     contextIcon?: JSX.Element;
     pressIconSetsTabToIdx?: number;
     initalTabIdx?: number;
+    lockToTab?: number;
 }
 
 export function TabbedView(props: TabbedViewProps) {
-    const [selTabIdx, setSelTabIdx] = useState(props.initalTabIdx === undefined ? 0 : props.initalTabIdx );
+    const [selTabIdxState, setSelTabIdx] = useState(props.initalTabIdx === undefined ? 0 : props.initalTabIdx );
+
+    const isTabLocked = props.lockToTab !== undefined;
+    let selTabIdx = props.lockToTab !== undefined ? props.lockToTab : selTabIdxState;
 
     return (
         <div className="column">
@@ -32,7 +36,7 @@ export function TabbedView(props: TabbedViewProps) {
     function getTabs() {
         return props.tabs.map((tab, idx) => {
             return (
-                <div id={tab} className={idx === selTabIdx ? "selected" : undefined} onClick={() => setSelTabIdx(idx)}>
+                <div id={tab} className={`${idx === selTabIdx ? "selected" : undefined} ${isTabLocked ? "disabled" : null}`} onClick={() => setSelTabIdx(idx)}>
                     {tab}
                 </div>
             )
