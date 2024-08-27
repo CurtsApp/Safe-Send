@@ -89,3 +89,52 @@ export async function GenerateAesCtrSingleUseKey() {
         ctr
     };
 }
+
+export const USER_PROFILE_SALT_LENGTH = 16;
+export function GenerateUserProfileAesSalt() {
+    return window.crypto.getRandomValues(new Uint8Array(USER_PROFILE_SALT_LENGTH));
+}
+
+export const USER_PROFILE_IV_LENGTH = 12;
+export function GenerateUserProfileIV() {
+    return window.crypto.getRandomValues(new Uint8Array(USER_PROFILE_IV_LENGTH));
+}
+
+export function GenerateAesPasswordKeyNewSalt(password: string) {
+    return new Promise<{key: CryptoKey, salt: Uint8Array}>((resolve, reject) => {
+        const salt = GenerateUserProfileAesSalt();
+        GenerateAesPasswordKey(password, salt).then(key => {
+            resolve({
+                key,
+                salt
+            });
+        })
+    })
+
+}
+
+export async function GenerateAesPasswordKey(password: string, salt: Uint8Array) {
+    const textEncoder = new TextEncoder();
+    const pbkKey = await window.crypto.subtle.importKey(
+        "raw",
+        textEncoder.encode(password),
+        "PBKDF2",
+        false,
+        ["deriveKey"],
+    );
+
+    const key = await window.crypto.subtle.deriveKey(
+        {
+            name: "PBKDF2",
+            salt,
+            iterations: 1000000,
+            hash: "SHA-256",
+        },
+        pbkKey,
+        { name: "AES-GCM", length: 256 },
+        true,
+        ["encrypt", "decrypt"],
+    );
+
+    return key;
+}

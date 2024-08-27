@@ -18,20 +18,20 @@ function App() {
       setUserProfile(undefined);
       return;
     }
-    VerifyUserProfilesDirectoryExists();
+    VerifyUserProfilesDirectoryExists().then(() => {
+      // Default to "old" username, if none then use provided name. This allows the creation of new user profiles.
+      let userFileName = userProfile === undefined ? newUser.name : userProfile.name;
+      // Save first using potentially old file name
+      SaveUser(newUser, GetUserProfilePath(userFileName), USER_PROFILE_BASE_DIR).then(() => {
+        if (userProfile && newUser.name !== userProfile.name) {
+          // Rename stored file
+          // TODO handle file name collision, don't DELETE ANYONES KEYS
+          renameFile(GetUserProfilePath(userProfile.name), GetUserProfilePath(newUser.name), USER_PROFILE_BASE_DIR);
+        }
+      });
 
-    // Default to "old" username, if none then use provided name. This allows the creation of new user profiles.
-    let userFileName = userProfile === undefined ? newUser.name : userProfile.name;
-    // Save first using potentially old file name
-    SaveUser(newUser, GetUserProfilePath(userFileName), USER_PROFILE_BASE_DIR).then(() => {
-      if (userProfile && newUser.name !== userProfile.name) {
-        // Rename stored file
-        // TODO handle file name collision, don't DELETE ANYONES KEYS
-        renameFile(GetUserProfilePath(userProfile.name), GetUserProfilePath(newUser.name), USER_PROFILE_BASE_DIR);
-      }
+      setUserProfile({ ...newUser });
     });
-
-    setUserProfile({ ...newUser });
   }
 
   const manageProfileView = <UserEditor user={userProfile} updateUser={updateUser}></UserEditor>;

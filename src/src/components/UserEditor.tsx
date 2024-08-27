@@ -3,7 +3,7 @@ import { ask, message, open, save } from "@tauri-apps/api/dialog";
 import { FileEntry, readDir } from "@tauri-apps/api/fs";
 import { useRef, useState } from "react";
 import { User } from "../interfaces/User";
-import { GenerateEncryptionKey, GenerateSigningKey } from "../utils/crypto_utils";
+import { GenerateAesPasswordKeyNewSalt, GenerateEncryptionKey, GenerateSigningKey } from "../utils/crypto_utils";
 import { getFirstString, stringSort } from "../utils/general_utils";
 import { DeleteFile, GetUserFromPath, GetUserProfilePath, SaveUser, USER_PROFILE_BASE_DIR, USER_PROFILE_DIR } from "../utils/user_utils";
 
@@ -15,17 +15,21 @@ interface UserEditorProps {
 export function UserEditor(props: UserEditorProps) {
     const [profiles, setProfiles] = useState<FileEntry[]>();
     const [profilesUpdating, setProfilesUpdating] = useState(false);
-    const [loggingInUser, setLoggingInUser] = useState("");
+    const [passwordPromptTitle, setPasswordPromptTitle] = useState("");
     const [password, setPassword] = useState("");
+    const [onPasswordEntry, setOnPasswordEntry] = useState<(password: string) => void>();
     const importProfileButton = <button onClick={() => importUserProfile()}>Import Profile</button>;
     const dialogRef = useRef<HTMLDialogElement | null>(null);
 
-    if (dialogRef) {
-        if (loggingInUser === "") {
-            dialogRef.current?.close();
-        } else {
-            dialogRef.current?.showModal();
-        }
+    const showPasswordPrompt = (title: string, onPasswordEntry: (password: string) => void) => {
+        setPasswordPromptTitle(title);
+        setPassword("");
+        dialogRef?.current?.showModal();
+        setOnPasswordEntry(() => onPasswordEntry);
+    }
+
+    const hidePasswordPrompt = () => {
+        dialogRef?.current?.close();
     }
 
     if (!profilesUpdating) {
@@ -40,7 +44,17 @@ export function UserEditor(props: UserEditorProps) {
                     <div>User Profiles - Log in</div>
                     <div className="column">
                         {profiles && profiles.length > 0 ?
-                            profiles.map(profile => <button id={profile.name} onClick={() => setLoggingInUser(profile.name?.split(".")[0] || "")}>{profile.name}</button>)
+                            profiles.map(profile => <button id={profile.name} onClick={() => {
+                                let potentialUserName = profile.name?.split(".")[0];
+                                if (potentialUserName) {
+                                    showPasswordPrompt(
+                                        potentialUserName,
+                                        (password) => {
+                                            attemptLogIn(potentialUserName, password);
+                                        }
+                                    )
+                                }
+                            }}>{profile.name}</button>)
                             : undefined}
                     </div>
                 </div>
@@ -50,7 +64,7 @@ export function UserEditor(props: UserEditorProps) {
                 </div>
                 <dialog ref={dialogRef}>
                     <div className="column">
-                        <div>{loggingInUser}</div>
+                        <div>{passwordPromptTitle}</div>
                         <label>Password:
                             <input
                                 type="text"
@@ -58,8 +72,12 @@ export function UserEditor(props: UserEditorProps) {
                                 onChange={e => setPassword(e.target.value)} />
                         </label>
                         <div className="row">
-                            <button onClick={() => closePasswordPrompt()}>Cancel</button>
-                            <button onClick={() => attemptLogIn(loggingInUser, password)}>Submit</button>
+                            <button onClick={() => hidePasswordPrompt()}>Cancel</button>
+                            <button onClick={() => {
+                                if (onPasswordEntry) {
+                                    onPasswordEntry(password)
+                                }
+                            }}>Submit</button>
                         </div>
                     </div>
                 </dialog>
@@ -97,14 +115,12 @@ export function UserEditor(props: UserEditorProps) {
         if (userName) {
             const userFilePath = GetUserProfilePath(userName);
 
-            // TODO validate password/encrypt .up files
-
-            GetUserFromPath(userFilePath, USER_PROFILE_BASE_DIR).then(async readUser => {
-                if (readUser) {
+            GetUserFromPath(userFilePath, password, USER_PROFILE_BASE_DIR).then(async user => {
+                if (user) {
                     // Force user name to match file name, this will fix any sync issues if they happened
-                    readUser.user.name = userName;
-                    props.updateUser(readUser.user);
-                    closePasswordPrompt();
+                    user.name = userName;
+                    props.updateUser(user);
+                    hidePasswordPrompt();
                 } else {
                     message(`Unable to log in to ${userName}`);
                 }
@@ -114,10 +130,6 @@ export function UserEditor(props: UserEditorProps) {
         }
     }
 
-    function closePasswordPrompt() {
-        setLoggingInUser("");
-        setPassword("");
-    }
     function logOut() {
         // Refresh any profile names
         setProfilesUpdating(false);
@@ -125,16 +137,22 @@ export function UserEditor(props: UserEditorProps) {
     }
 
     function updateUserData(user: User) {
-        
         props.updateUser(user);
     }
 
+    function createNewUserProfile() {
+        showPasswordPrompt(
+            "New User",
+            (password) => {
+                let signingKey = GenerateSigningKey();
+                let encryptKey = GenerateEncryptionKey();
+                let profileEncryptionKey = GenerateAesPasswordKeyNewSalt(password);
 
-
-    async function createNewUserProfile() {
-        let signingKey = await GenerateSigningKey();
-        let encryptKey = await GenerateEncryptionKey();
-        updateUserData({ name: "New User", note: "", encryptionKeys: encryptKey, signingKeys: signingKey, contacts: [] });
+                Promise.all([signingKey, encryptKey, profileEncryptionKey]).then((values) => {
+                    updateUserData({ name: "New User", note: "", encryptionKeys: values[1], signingKeys: values[0], contacts: [], userDataEncryptionKey: values[2].key, profileSalt: values[2].salt });
+                });
+            }
+        )
     }
 
     async function importUserProfile() {
@@ -150,13 +168,18 @@ export function UserEditor(props: UserEditorProps) {
         let path = getFirstString(selected);
 
         if (path) {
-            GetUserFromPath(path).then(async readUser => {
-                if (readUser) {
-                    updateUserData(readUser.user);
-                } else {
-                    dialog.message(`Failed to import user profile: ${path}`)
+            showPasswordPrompt(
+                "New User",
+                (password) => {
+                    GetUserFromPath(path, password).then(async user => {
+                        if (user) {
+                            updateUserData(user);
+                        } else {
+                            dialog.message(`Failed to import user profile: ${path}`)
+                        }
+                    })
                 }
-            })
+            )
         }
     }
 

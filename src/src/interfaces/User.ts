@@ -6,6 +6,8 @@ export interface User {
     encryptionKeys: CryptoKeyPair;
     signingKeys: CryptoKeyPair;
     contacts: Contact[];
+    userDataEncryptionKey: CryptoKey;
+    profileSalt: Uint8Array;
 }
 
 export interface SavedUser {
