@@ -23,19 +23,14 @@
   -webkit-text-size-adjust: 100%;
 }
 
-.container {
-  padding: 0.6em;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  /*align-items: center;
-  text-align: center; */
+body {
+  margin: 0;
 }
 
 .outlineContainer {
   padding: 0.6em;
   border-radius: 16px;
-  border: 1px solid #434343;
+  border: 1px solid #a7a7a7;
 }
 
 
@@ -78,6 +73,18 @@
   row-gap: 0.6em;
 }
 
+.centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.fillWidth {
+  width: 100%;
+}
+
 a {
   font-weight: 500;
   color: #646cff;
@@ -109,6 +116,7 @@ button {
   transition: border-color 0.25s;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
   max-width: max-content;
+  height: max-content;
 }
 
 button.danger {
@@ -152,10 +160,6 @@ button {
   outline: none;
 }
 
-#greet-input {
-  margin-right: 5px;
-}
-
 .tabcontrol {
   display: flex;
   flex-direction: row;
@@ -196,9 +200,10 @@ button {
   background-color: #f6f6f6;
   padding: 0.1em 0.3em;
   border-radius: 4px;
-  border: 1px solid #434343;
+  border: 1px solid #a7a7a7;
   overflow: hidden;
   white-space: nowrap;
+  color: #545454
 }
 
 .outlineContainer .content {
@@ -216,6 +221,14 @@ button {
 
 .interactive:hover {
   background-color: lightblue;
+}
+
+.interactiveText {
+  cursor: pointer;
+}
+
+.interactiveText:hover {
+  color: skyblue;
 }
 
 .labeledInputContainer {
@@ -286,3 +299,44 @@ button {
     border: 2px solid #1a73e8;
   }
 }
+
+.sidebarViewContainer {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.sidebar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 200px;
+  background-color: #202020;
+  color: #fafafa;
+
+  div {
+    display: flex;
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 0.3em 0.6em;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    transition: 250ms;
+  }
+
+  div.selected{
+    background-color: rgb(92, 92, 92);
+  }
+}
+
+.sidebarView {
+  width: 100%;
+  display: flex;
+  color: #0f0f0f;
+  background-color: #f6f6f6;
+  padding: 8px;
+}
+
+

@@ -69,46 +69,48 @@ export function ContactsEditor(props: ContactsEditorProps) {
     })
 
     return (
-        <div className="column">
-            <div className="row">
+        <div className="column fillWidth" style={{justifyContent: "space-evenly"}}>
+            <div className="row centered">
                 <button onClick={handleImportContact}>Add Contact</button>
                 <button onClick={() => props.user ? handleExportContact(GetContactFromUser(props.user)) : undefined}>Share My Contact</button>
             </div>
-
-            <LabeledOutlineContainer label={"Contacts"}>
-                <div className="column">
-                    <div style={{marginLeft: "0.6em"}}>
-                        <LabeledInputField
-                            label={"Search"}
-                            fieldValue={searchQuery}
-                            updateStringValue={(updatedValue) => setSearchQuery(updatedValue)} />
+            <div className="centered">
+                <LabeledOutlineContainer label={"Contacts"}>
+                    <div className="column">
+                        <div style={{ marginLeft: "0.6em" }}>
+                            <LabeledInputField
+                                label={"Search"}
+                                fieldValue={searchQuery}
+                                updateStringValue={(updatedValue) => setSearchQuery(updatedValue)} />
+                        </div>
+                        {visibleContacts.length === 0 ?
+                            <div>No contacts found</div>
+                            : <ul className="row" style={{ listStyleType: 'none', padding: 0, flexWrap: "wrap", rowGap: "0.6em" }}>
+                                {visibleContacts.map((contact, idx) => (
+                                    <li key={`${contact.name}.${contact.note}.${idx}`} className="column outlineContainer">
+                                        <LabeledInputField
+                                            label={"Name"}
+                                            fieldValue={contact.name}
+                                            updateStringValue={(updatedValue) => handleUpdateContact(idx, 'name', updatedValue)} />
+                                        <LabeledInputField
+                                            label={"Note"}
+                                            fieldValue={contact.note || ""}
+                                            updateStringValue={(updatedValue) => handleUpdateContact(idx, 'note', updatedValue)} />
+                                        <div className="row">
+                                            <button onClick={() => handleExportContact(contacts[idx])}>
+                                                Share
+                                            </button>
+                                            <button className="danger" onClick={() => handleDeleteContact(idx)}>
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>}
                     </div>
-                    {visibleContacts.length === 0 ?
-                        <div>No contacts found</div>
-                        : <ul className="column" style={{ listStyleType: 'none', padding: 0 }}>
-                            {visibleContacts.map((contact, idx) => (
-                                <li key={`${contact.name}.${contact.note}.${idx}`} className="column outlineContainer">
-                                    <LabeledInputField
-                                        label={"Name"}
-                                        fieldValue={contact.name}
-                                        updateStringValue={(updatedValue) => handleUpdateContact(idx, 'name', updatedValue)} />
-                                    <LabeledInputField
-                                        label={"Note"}
-                                        fieldValue={contact.note || ""}
-                                        updateStringValue={(updatedValue) => handleUpdateContact(idx, 'note', updatedValue)} />
-                                    <div className="row">
-                                        <button onClick={() => handleExportContact(contacts[idx])}>
-                                            Share
-                                        </button>
-                                        <button className="danger" onClick={() => handleDeleteContact(idx)}>
-                                            Delete
-                                        </button>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>}
-                </div>
-            </LabeledOutlineContainer>
+                </LabeledOutlineContainer>
+            </div>
+
         </div>
     );
 

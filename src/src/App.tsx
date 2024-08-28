@@ -9,6 +9,7 @@ import { Contact } from "./interfaces/Contact";
 import { GetUserProfilePath, SaveUser, USER_PROFILE_BASE_DIR, VerifyUserProfilesDirectoryExists } from "./utils/user_utils";
 import { renameFile } from "@tauri-apps/api/fs";
 import { DecryptEditor } from "./components/DecryptEditor";
+import { SideBarView } from "./components/SideBarView";
 
 function App() {
   const [userProfile, setUserProfile] = useState<User>();
@@ -44,12 +45,11 @@ function App() {
   }}></ContactsEditor>
 
   let userName = userProfile ? userProfile.name : "Log in"
-  const contextIcon = <button>{userName}</button>
+  const contextIcon = <div className="interactiveText" style={{width: "100%", justifyContent: "center"}}>{userName}</div>
 
   return (
-    <div className="container">
-      <TabbedView
-        tabs={["Encrypt", "Decrypt", "Manage Profile", "Contacts"]}
+    <SideBarView
+        tabs={["Encrypt", "Decrypt", "My Profile", "Contacts"]}
         tabViews={[
           packageFileView,
           decryptFileView,
@@ -61,7 +61,6 @@ function App() {
         initalTabIdx={2}
         lockToTab={userProfile === undefined ? 2 : undefined}
       />
-    </div>
   );
 }
 

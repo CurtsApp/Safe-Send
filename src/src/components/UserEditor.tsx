@@ -41,7 +41,7 @@ export function UserEditor(props: UserEditorProps) {
 
     if (!props.user) {
         return (
-            <div className="column">
+            <div className="column centered">
                 <LabeledOutlineContainer label="User Profiles - Log in">
                     <div className="column">
                         {profiles && profiles.length > 0 ?
@@ -87,33 +87,37 @@ export function UserEditor(props: UserEditorProps) {
     }
 
     return (
-        <div className="column">
-            <LabeledInputField
-                fieldValue={props.user.name || ""}
-                label="Name"
-                updateStringValue={(updatedName) => {
-                    if (props.user) {
-                        updateUserData({ ...props.user, name: updatedName })
-                    }
-                }}
-            />
-            <LabeledInputField
-                fieldValue={props.user.note || ""}
-                label="Note"
-                updateStringValue={(updatedNote) => {
-                    if (props.user) {
-                        updateUserData({ ...props.user, note: updatedNote })
-                    }
-                }}
-            />
+        <div className="centered">
+            <LabeledOutlineContainer label="My Profile">
+                <div className="column">
+                    <LabeledInputField
+                        fieldValue={props.user.name || ""}
+                        label="Name"
+                        updateStringValue={(updatedName) => {
+                            if (props.user) {
+                                updateUserData({ ...props.user, name: updatedName })
+                            }
+                        }}
+                    />
+                    <LabeledInputField
+                        fieldValue={props.user.note || ""}
+                        label="Note"
+                        updateStringValue={(updatedNote) => {
+                            if (props.user) {
+                                updateUserData({ ...props.user, note: updatedNote })
+                            }
+                        }}
+                    />
 
-            <div className="row">
-                <button onClick={() => exportUserProfile()}>Share Profile</button>
-                <button onClick={() => logOut()}>Log Out</button>
-                <button className="danger" onClick={() => deleteCurrentProfile()}>Delete Profile</button>
-            </div>
+                    <div className="row">
+                        <button onClick={() => exportUserProfile()}>Share Profile</button>
+                        <button onClick={() => logOut()}>Log Out</button>
+                        <button className="danger" onClick={() => deleteCurrentProfile()}>Delete Profile</button>
+                    </div>
 
-        </div >
+                </div >
+            </LabeledOutlineContainer>
+        </div>
     );
 
     function attemptLogIn(userName: string, password: string) {

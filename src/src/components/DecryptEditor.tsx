@@ -138,12 +138,10 @@ interface ContactRowProps {
 
 function ContactRow(props: ContactRowProps) {
     return (
-        <div className="row interactive" style={{ justifyContent: "space-between" }} onClick={() => {
-            props.setSelected(!props.isSelected)
-        }}>
-            <div className="column">
+        <div className="row interactive" style={{ justifyContent: "space-between" }} onClick={() => props.setSelected(!props.isSelected)}>
+            <div className="row">
                 <div>{props.contact.name}</div>
-                {props.contact.note !== undefined && props.contact.note.trim() !== "" ? <div><i>props.contact.note</i></div> : undefined}
+                {props.contact.note !== undefined && props.contact.note.trim() !== "" ? <div><i>- {props.contact.note}</i></div> : undefined}
             </div>
             <div>
                 <input type="checkbox" checked={props.isSelected}></input>
