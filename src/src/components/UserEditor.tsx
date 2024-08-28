@@ -7,6 +7,7 @@ import { GenerateAesPasswordKeyNewSalt, GenerateEncryptionKey, GenerateSigningKe
 import { getFirstString, stringSort } from "../utils/general_utils";
 import { DeleteFile, GetUserFromPath, GetUserProfilePath, SaveUser, USER_PROFILE_BASE_DIR, USER_PROFILE_DIR } from "../utils/user_utils";
 import { LabeledInputField } from "./LabeledInputField";
+import { LabeledOutlineContainer } from "./LabeledOutlineContainer";
 
 interface UserEditorProps {
     user: User | undefined,
@@ -41,8 +42,7 @@ export function UserEditor(props: UserEditorProps) {
     if (!props.user) {
         return (
             <div className="column">
-                <div className="outlineContainer">
-                    <div>User Profiles - Log in</div>
+                <LabeledOutlineContainer label="User Profiles - Log in">
                     <div className="column">
                         {profiles && profiles.length > 0 ?
                             profiles.map(profile => <button id={profile.name} onClick={() => {
@@ -55,17 +55,17 @@ export function UserEditor(props: UserEditorProps) {
                                         }
                                     )
                                 }
-                            }}>{profile.name}</button>)
+                            }}>{profile.name?.split(".")[0] || profile.name}</button>)
                             : undefined}
                     </div>
-                </div>
+                </LabeledOutlineContainer>
                 <div className="row">
                     <button onClick={() => createNewUserProfile()}>New Profile</button>
                     {importProfileButton}
                 </div>
                 <dialog ref={dialogRef}>
                     <div className="column">
-                        <div style={{textAlign: "center"}}>{passwordPromptTitle}</div>
+                        <div style={{ textAlign: "center" }}>{passwordPromptTitle}</div>
                         <LabeledInputField
                             fieldValue={password}
                             label="Password"

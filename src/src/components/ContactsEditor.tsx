@@ -77,16 +77,17 @@ export function ContactsEditor(props: ContactsEditorProps) {
 
             <LabeledOutlineContainer label={"Contacts"}>
                 <div className="column">
-                    <LabeledInputField
-                        label={"Search"}
-                        fieldValue={searchQuery}
-                        updateStringValue={(updatedValue) => setSearchQuery(updatedValue)} />
-
+                    <div style={{marginLeft: "0.6em"}}>
+                        <LabeledInputField
+                            label={"Search"}
+                            fieldValue={searchQuery}
+                            updateStringValue={(updatedValue) => setSearchQuery(updatedValue)} />
+                    </div>
                     {visibleContacts.length === 0 ?
                         <div>No contacts found</div>
-                        : <ul style={{ listStyleType: 'none', padding: 0 }}>
+                        : <ul className="column" style={{ listStyleType: 'none', padding: 0 }}>
                             {visibleContacts.map((contact, idx) => (
-                                <li key={`${contact.name}.${contact.note}`} className="column outlineContainer">
+                                <li key={`${contact.name}.${contact.note}.${idx}`} className="column outlineContainer">
                                     <LabeledInputField
                                         label={"Name"}
                                         fieldValue={contact.name}
