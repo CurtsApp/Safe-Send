@@ -118,7 +118,7 @@ export function DecryptEditor(props: DecryptEditorProps) {
                     }}>Browse</button>
                 </div>
             </LabeledOutlineContainer>
-            <div className="column" style={{ width: "100%" }}>
+            <div className="column" style={{ maxWidth: 350 }}>
                 <LabeledOutlineContainer label="Expected File Sender">
                     {getContactList()}
                 </LabeledOutlineContainer>

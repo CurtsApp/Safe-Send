@@ -69,49 +69,67 @@ export function ContactsEditor(props: ContactsEditorProps) {
     })
 
     return (
-        <div className="column fillWidth" style={{justifyContent: "space-evenly"}}>
-            <div className="row centered">
+        <div className="column fillWidth">
+            <div className="row centered" style={{ maxHeight: 100 }}>
                 <button onClick={handleImportContact}>Add Contact</button>
                 <button onClick={() => props.user ? handleExportContact(GetContactFromUser(props.user)) : undefined}>Share My Contact</button>
             </div>
-            <div className="centered">
-                <LabeledOutlineContainer label={"Contacts"}>
-                    <div className="column">
-                        <div style={{ marginLeft: "0.6em" }}>
-                            <LabeledInputField
-                                label={"Search"}
-                                fieldValue={searchQuery}
-                                updateStringValue={(updatedValue) => setSearchQuery(updatedValue)} />
-                        </div>
-                        {visibleContacts.length === 0 ?
-                            <div>No contacts found</div>
-                            : <ul className="row" style={{ listStyleType: 'none', padding: 0, flexWrap: "wrap", rowGap: "0.6em" }}>
-                                {visibleContacts.map((contact, idx) => (
-                                    <li key={`${contact.name}.${contact.note}.${idx}`} className="column outlineContainer">
-                                        <LabeledInputField
-                                            label={"Name"}
-                                            fieldValue={contact.name}
-                                            updateStringValue={(updatedValue) => handleUpdateContact(idx, 'name', updatedValue)} />
-                                        <LabeledInputField
-                                            label={"Note"}
-                                            fieldValue={contact.note || ""}
-                                            updateStringValue={(updatedValue) => handleUpdateContact(idx, 'note', updatedValue)} />
-                                        <div className="row">
-                                            <button onClick={() => handleExportContact(contacts[idx])}>
-                                                Share
-                                            </button>
-                                            <button className="danger" onClick={() => handleDeleteContact(idx)}>
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>}
+            <LabeledOutlineContainer label={"Contacts"} fitContentWidth={false}>
+                <div className="column">
+                    <div style={{ marginLeft: "0.6em" }}>
+                        <LabeledInputField
+                            label={"Search"}
+                            fieldValue={searchQuery}
+                            updateStringValue={(updatedValue) => setSearchQuery(updatedValue)} />
                     </div>
-                </LabeledOutlineContainer>
-            </div>
+                    {visibleContacts.length === 0 ?
+                        <div>No contacts found</div>
+                        : <ul key="contactsList" className="row" style={{ listStyleType: 'none', padding: 0, flexWrap: "wrap", rowGap: "0.6em", justifyContent: "flex-start" }}>
+                            {visibleContacts.map((contact, idx) => (
+                                <ContactTile
+                                    key={idx.toString()}
+                                    contact={contact}
+                                    updateName={(updatedValue) => handleUpdateContact(idx, 'name', updatedValue)}
+                                    updateNote={(updatedValue) => handleUpdateContact(idx, 'note', updatedValue)}
+                                    export={() => handleExportContact(contacts[idx])}
+                                    delete={() => handleDeleteContact(idx)}
+                                />
+                            ))}
+                        </ul>}
+                </div>
+            </LabeledOutlineContainer>
 
         </div>
     );
+}
 
+interface ContactTileProps {
+    contact: Contact;
+    key: string;
+    updateName: (newName: string) => void;
+    updateNote: (newName: string) => void;
+    export: () => void;
+    delete: () => void;
+}
+function ContactTile(props: ContactTileProps) {
+    return (
+        <li key={props.key} className="column outlineContainer">
+            <LabeledInputField
+                label={"Name"}
+                fieldValue={props.contact.name}
+                updateStringValue={(updatedValue) => props.updateName(updatedValue)} />
+            <LabeledInputField
+                label={"Note"}
+                fieldValue={props.contact.note || ""}
+                updateStringValue={(updatedValue) => props.updateNote(updatedValue)} />
+            <div className="row">
+                <button onClick={() => props.export()}>
+                    Share
+                </button>
+                <button className="danger" onClick={() => props.delete()}>
+                    Delete
+                </button>
+            </div>
+        </li>
+    )
 }

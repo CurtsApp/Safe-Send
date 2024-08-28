@@ -110,7 +110,7 @@ export function PackagingEditor(props: PackagingEditorProps) {
                     }}>Browse</button>
                 </div>
             </LabeledOutlineContainer>
-            <div className="column" style={{ width: "100%" }}>
+            <div className="column" style={{ maxWidth: 350 }}>
                 <LabeledOutlineContainer label="Encrypt Files For">
                     {getContactList()}
                 </LabeledOutlineContainer>
@@ -136,7 +136,7 @@ function ContactRow(props: ContactRowProps) {
                 {props.contact.note !== undefined && props.contact.note.trim() !== "" ? <div><i>- {props.contact.note}</i></div> : undefined}
             </div>
             <div>
-                <input type="checkbox" checked={props.isSelected}></input>
+                <input type="checkbox" checked={props.isSelected} readOnly></input>
             </div>
         </div>
     )
