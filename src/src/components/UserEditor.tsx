@@ -6,6 +6,7 @@ import { User } from "../interfaces/User";
 import { GenerateAesPasswordKeyNewSalt, GenerateEncryptionKey, GenerateSigningKey } from "../utils/crypto_utils";
 import { getFirstString, stringSort } from "../utils/general_utils";
 import { DeleteFile, GetUserFromPath, GetUserProfilePath, SaveUser, USER_PROFILE_BASE_DIR, USER_PROFILE_DIR } from "../utils/user_utils";
+import { LabeledInputField } from "./LabeledInputField";
 
 interface UserEditorProps {
     user: User | undefined,
@@ -64,13 +65,13 @@ export function UserEditor(props: UserEditorProps) {
                 </div>
                 <dialog ref={dialogRef}>
                     <div className="column">
-                        <div>{passwordPromptTitle}</div>
-                        <label>Password:
-                            <input
-                                type="text"
-                                value={password}
-                                onChange={e => setPassword(e.target.value)} />
-                        </label>
+                        <div style={{textAlign: "center"}}>{passwordPromptTitle}</div>
+                        <LabeledInputField
+                            fieldValue={password}
+                            label="Password"
+                            updateStringValue={(updatedValue) => setPassword(updatedValue)}
+                            fieldType="password"
+                        />
                         <div className="row">
                             <button onClick={() => hidePasswordPrompt()}>Cancel</button>
                             <button onClick={() => {
@@ -87,27 +88,31 @@ export function UserEditor(props: UserEditorProps) {
 
     return (
         <div className="column">
-            <label>Name:
-                <input
-                    type="text" value={props.user.name || ""}
-                    onChange={e => {
-                        if (props.user) {
-                            updateUserData({ ...props.user, name: e.target.value })
-                        }
-                    }} />
-            </label>
-            <label>Note:
-                <input
-                    type="text" value={props.user.note || ""}
-                    onChange={e => {
-                        if (props.user) {
-                            updateUserData({ ...props.user, note: e.target.value })
-                        }
-                    }} />
-            </label>
-            <button onClick={() => exportUserProfile()}>Export Profile</button>
-            <button onClick={() => logOut()}>Log Out</button>
-            <button className="danger" onClick={() => deleteCurrentProfile()}>Delete Profile</button>
+            <LabeledInputField
+                fieldValue={props.user.name || ""}
+                label="Name"
+                updateStringValue={(updatedName) => {
+                    if (props.user) {
+                        updateUserData({ ...props.user, name: updatedName })
+                    }
+                }}
+            />
+            <LabeledInputField
+                fieldValue={props.user.note || ""}
+                label="Note"
+                updateStringValue={(updatedNote) => {
+                    if (props.user) {
+                        updateUserData({ ...props.user, note: updatedNote })
+                    }
+                }}
+            />
+
+            <div className="row">
+                <button onClick={() => exportUserProfile()}>Share Profile</button>
+                <button onClick={() => logOut()}>Log Out</button>
+                <button className="danger" onClick={() => deleteCurrentProfile()}>Delete Profile</button>
+            </div>
+
         </div >
     );
 

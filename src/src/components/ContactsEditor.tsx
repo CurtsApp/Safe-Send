@@ -4,6 +4,9 @@ import { User } from "../interfaces/User";
 import { ExportContact, GetContactFromPath } from "../utils/contact_utils";
 import { getFirstString, stringSort } from "../utils/general_utils";
 import { GetContactFromUser } from "../utils/user_utils";
+import { LabeledOutlineContainer } from "./LabeledOutlineContainer";
+import { LabeledInputField } from "./LabeledInputField";
+import { useState } from "react";
 
 interface ContactsEditorProps {
     user: User | undefined;
@@ -11,6 +14,8 @@ interface ContactsEditorProps {
 }
 
 export function ContactsEditor(props: ContactsEditorProps) {
+    const [searchQuery, setSearchQuery] = useState("");
+
     if (!props.user) {
         return <div>Please log in</div>;
     }
@@ -49,50 +54,60 @@ export function ContactsEditor(props: ContactsEditorProps) {
     };
 
     const handleExportContact = async (contact: Contact) => {
-        const path = await save({ defaultPath: contact.name, title: "Export My Contact", filters: [{ extensions: ["ssc"], name: "Safe Send Contact" }] });
+        const path = await save({ defaultPath: contact.name, title: "Share My Contact", filters: [{ extensions: ["ssc"], name: "Safe Send Contact" }] });
         if (path) {
             ExportContact(contact, path);
         }
     };
 
+    let visibleContacts = contacts.filter((contact) => {
+        let query = searchQuery.trim();
+        if (query === "") {
+            return true;
+        }
+        return contact.name.includes(query) || contact.note?.includes(query);
+    })
+
     return (
         <div className="column">
             <div className="row">
-                <button onClick={handleImportContact}>Import Contact</button>
-                <button onClick={() => props.user ? handleExportContact(GetContactFromUser(props.user)) : undefined}>Export My Contact</button>
+                <button onClick={handleImportContact}>Add Contact</button>
+                <button onClick={() => props.user ? handleExportContact(GetContactFromUser(props.user)) : undefined}>Share My Contact</button>
             </div>
 
-            <ul style={{ listStyleType: 'none', padding: 0 }}>
-                {contacts.map((contact, idx) => (
-                    <li key={`${contact.name}.${contact.note}`} className="column outlineContainer">
-                        <label>
-                            Name:
-                            <input
-                                type="text"
-                                value={contact.name}
-                                onChange={(e) => handleUpdateContact(idx, 'name', e.target.value)}
-                            />
-                        </label>
-                        <label>
-                            Note:
-                            <input
-                                type="text"
-                                value={contact.note}
-                                onChange={(e) => handleUpdateContact(idx, 'note', e.target.value)}
-                            />
-                        </label>
+            <LabeledOutlineContainer label={"Contacts"}>
+                <div className="column">
+                    <LabeledInputField
+                        label={"Search"}
+                        fieldValue={searchQuery}
+                        updateStringValue={(updatedValue) => setSearchQuery(updatedValue)} />
 
-                        <div className="row">
-                            <button onClick={() => handleExportContact(contacts[idx])}>
-                                Export
-                            </button>
-                            <button className="danger" onClick={() => handleDeleteContact(idx)}>
-                                Delete
-                            </button>
-                        </div>
-                    </li>
-                ))}
-            </ul>
+                    {visibleContacts.length === 0 ?
+                        <div>No contacts found</div>
+                        : <ul style={{ listStyleType: 'none', padding: 0 }}>
+                            {visibleContacts.map((contact, idx) => (
+                                <li key={`${contact.name}.${contact.note}`} className="column outlineContainer">
+                                    <LabeledInputField
+                                        label={"Name"}
+                                        fieldValue={contact.name}
+                                        updateStringValue={(updatedValue) => handleUpdateContact(idx, 'name', updatedValue)} />
+                                    <LabeledInputField
+                                        label={"Note"}
+                                        fieldValue={contact.note || ""}
+                                        updateStringValue={(updatedValue) => handleUpdateContact(idx, 'note', updatedValue)} />
+                                    <div className="row">
+                                        <button onClick={() => handleExportContact(contacts[idx])}>
+                                            Share
+                                        </button>
+                                        <button className="danger" onClick={() => handleDeleteContact(idx)}>
+                                            Delete
+                                        </button>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>}
+                </div>
+            </LabeledOutlineContainer>
         </div>
     );
 

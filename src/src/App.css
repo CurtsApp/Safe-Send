@@ -28,8 +28,8 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  text-align: center;
+  /*align-items: center;
+  text-align: center; */
 }
 
 .outlineContainer {
@@ -178,6 +178,7 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
+  transition: 250ms;
 }
 
 .tabcontrol div.selected{
@@ -215,4 +216,73 @@ button {
 
 .interactive:hover {
   background-color: lightblue;
+}
+
+.labeledInputContainer {
+  position: relative;
+  margin-top: 10px;
+  .input-label {
+    position: absolute;
+    color: #80868b;
+    font-size: 16px;
+    font-weight: 400;
+    max-width: calc(100% - (2 * 8px));
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    left: 8px;
+    top: 13px;
+    padding: 0 8px;
+    transition: 250ms;
+    user-select: none;
+    pointer-events: none;
+    svg {
+      position: relative;
+      width: 15px;
+      height: 15px;
+      top: 2px;
+      transition: 250ms;
+    }
+  }
+  .input-1 {
+    box-sizing: border-box;
+    height: 50px;
+    width: 100%;
+    border-radius: 4px;
+    color: #202124;
+    border: 1px solid #dadce0;
+    padding: 13px 15px;
+
+    transition: 250ms;
+    &:focus {
+      outline: none;
+      border: 2px solid #1a73e8;
+      transition: 250ms;
+    }
+  }
+}
+
+.labeledInputContainer.focus,
+.labeledInputContainer.active {
+  .input-label {
+    top: -12px;
+    background: #ffffff;
+    font-size: 11px;
+    border-radius: 4px;
+    border: 1px solid #dadce0;
+    transition: 250ms;
+
+    svg {
+      position: relative;
+      width: 11px;
+      height: 11px;
+      top: 2px;
+      transition: 250ms;
+    }
+  }
+}
+.labeledInputContainer.active {
+  .input-1 {
+    border: 2px solid #1a73e8;
+  }
 }
