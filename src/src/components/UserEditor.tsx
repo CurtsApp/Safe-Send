@@ -45,7 +45,7 @@ export function UserEditor(props: UserEditorProps) {
                 <LabeledOutlineContainer label="User Profiles - Log in">
                     <div className="column">
                         {profiles && profiles.length > 0 ?
-                            profiles.map(profile => <button id={profile.name} onClick={() => {
+                            profiles.map(profile => <button key={profile.name} onClick={() => {
                                 let potentialUserName = profile.name?.split(".")[0];
                                 if (potentialUserName) {
                                     showPasswordPrompt(
@@ -64,7 +64,7 @@ export function UserEditor(props: UserEditorProps) {
                     {importProfileButton}
                 </div>
                 <dialog ref={dialogRef}>
-                    <div className="column">
+                    <form className="column">
                         <div style={{ textAlign: "center" }}>{passwordPromptTitle}</div>
                         <LabeledInputField
                             fieldValue={password}
@@ -74,13 +74,15 @@ export function UserEditor(props: UserEditorProps) {
                         />
                         <div className="row">
                             <button onClick={() => hidePasswordPrompt()}>Cancel</button>
-                            <button onClick={() => {
-                                if (onPasswordEntry) {
-                                    onPasswordEntry(password)
-                                }
-                            }}>Submit</button>
+                            <button
+                                type="submit"
+                                onClick={() => {
+                                    if (onPasswordEntry) {
+                                        onPasswordEntry(password)
+                                    }
+                                }}>Submit</button>
                         </div>
-                    </div>
+                    </form>
                 </dialog>
             </div>
         )
