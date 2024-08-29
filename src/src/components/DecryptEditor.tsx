@@ -1,4 +1,4 @@
-import { open, save } from "@tauri-apps/api/dialog";
+import { message, open, save } from "@tauri-apps/api/dialog";
 import { writeBinaryFile } from "@tauri-apps/api/fs";
 import { sep } from "@tauri-apps/api/path";
 import { useState } from "react";
@@ -6,8 +6,8 @@ import { Contact } from "../interfaces/Contact";
 import { User } from "../interfaces/User";
 import { DecryptFile } from "../utils/crypto_utils";
 import { EFFormat } from "../utils/key_utils";
-import { LabeledOutlineContainer } from "./LabeledOutlineContainer";
 import { GetContactFromUser } from "../utils/user_utils";
+import { LabeledOutlineContainer } from "./LabeledOutlineContainer";
 
 interface DecryptEditorProps {
     user: User | undefined,
@@ -27,7 +27,7 @@ export function DecryptEditor(props: DecryptEditorProps) {
 
         inputFiles.forEach(async file => {
             if (props.user && selectedContact !== undefined) {
-                let contactsToDecryptFor = props.user.contacts[selectedContact]
+                let contactsToDecryptFor = selectedContact === 0 ? GetContactFromUser(props.user) : props.user.contacts[selectedContact - 1];
 
                 DecryptFile(EFFormat.V0, file, contactsToDecryptFor, props.user).then(async (fileDetails) => {
                     let splitPath = file.split(sep);
@@ -46,8 +46,9 @@ export function DecryptEditor(props: DecryptEditorProps) {
                         writeBinaryFile(path, fileDetails.decryptedFile);
                     }
 
-                }).catch(reason => {
-                    // TODO handle failing to decrypt file
+                }).catch(() => {
+                    // TODO give distinct error for unable to decrypt and invalid signatures
+                    message(`Unable to decrypt ${file}`);
                 })
             }
         });

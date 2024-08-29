@@ -1,13 +1,11 @@
-import { open, save } from "@tauri-apps/api/dialog";
-import { writeBinaryFile } from "@tauri-apps/api/fs";
-import { sep } from "@tauri-apps/api/path";
+import { message, open, save } from "@tauri-apps/api/dialog";
 import { useState } from "react";
 import { Contact } from "../interfaces/Contact";
 import { User } from "../interfaces/User";
-import { DecryptFile, EncryptFile } from "../utils/crypto_utils";
+import { EncryptFile } from "../utils/crypto_utils";
 import { EFFormat } from "../utils/key_utils";
-import { LabeledOutlineContainer } from "./LabeledOutlineContainer";
 import { GetContactFromUser } from "../utils/user_utils";
+import { LabeledOutlineContainer } from "./LabeledOutlineContainer";
 
 interface PackagingEditorProps {
     user: User | undefined,
@@ -25,21 +23,40 @@ export function PackagingEditor(props: PackagingEditorProps) {
             return;
         }
 
-        const path = await save({
-            filters: [
-                {
-                    name: 'Safe File',
-                    extensions: ["ef"],
-                },
-            ],
-            title: "Output File"
-        });
 
-        if (props.user && path) {
+
+        if (props.user) {
             // @ts-ignore
-            let contactsToEncryptFor = selectedContacts.map(selIdx => props.user.contacts[selIdx]);
+            let contactsToEncryptFor = selectedContacts.map(selIdx => {
+                if (selIdx === 0) {
+                    // @ts-ignore
+                    return GetContactFromUser(props.user);
+                } else {
+                    // @ts-ignore
+                    return props.user.contacts[selIdx - 1]
+                }
+
+            });
             contactsToEncryptFor = contactsToEncryptFor.filter(contact => contact !== undefined);
-            EncryptFile(EFFormat.V0, inputFiles[0], path, contactsToEncryptFor, props.user);
+
+            for (const i in inputFiles) {
+                const file = inputFiles[i];
+                const path = await save({
+                    filters: [
+                        {
+                            name: 'Safe File',
+                            extensions: ["ef"],
+                        },
+                    ],
+                    title: `Output: Encrypting ${file}`
+                });
+
+                if (path) {
+                    EncryptFile(EFFormat.V0, file, path, contactsToEncryptFor, props.user).catch(() => {
+                        message(`Unable to encrypt ${file}`);
+                    });
+                }
+            }
         }
     }
 

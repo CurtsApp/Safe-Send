@@ -1,9 +1,9 @@
 import { readBinaryFile, writeBinaryFile } from "@tauri-apps/api/fs";
 import { Contact } from "../interfaces/Contact";
-import { ECDSA_SIG_LEN, GenerateAesCtrSingleUseKey, VerifyBin } from "./crypto_utils";
-import { getPaddedUint32, getUint32, getUint32FromOffset } from "./general_utils";
-import { AES_CTR_NONCE_SIZE, EFFormat } from "./key_utils";
 import { User } from "../interfaces/User";
+import { ECDSA_SIG_LEN, GenerateAesCtrSingleUseKey, VerifyBin } from "./crypto_utils";
+import { getPaddedUint32, getUint32FromOffset } from "./general_utils";
+import { AES_CTR_NONCE_SIZE, EFFormat } from "./key_utils";
 
 /*
 Encrypted file structure

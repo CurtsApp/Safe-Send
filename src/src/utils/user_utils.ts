@@ -1,4 +1,4 @@
-import { BaseDirectory, createDir, exists, FsOptions, readBinaryFile, readTextFile, removeFile, writeBinaryFile, writeTextFile } from "@tauri-apps/api/fs";
+import { BaseDirectory, createDir, exists, FsOptions, readBinaryFile, removeFile, writeBinaryFile } from "@tauri-apps/api/fs";
 import { Contact } from "../interfaces/Contact";
 import { SavedUser, User } from "../interfaces/User";
 import { GetContact, GetSavedContact } from "./contact_utils";

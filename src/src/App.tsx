@@ -1,15 +1,14 @@
+import { renameFile } from "@tauri-apps/api/fs";
 import { useState } from "react";
 import "./App.css";
-import { PackagingEditor } from "./components/PackagingEditor";
-import { TabbedView } from "./components/TabbedView";
-import { UserEditor } from "./components/UserEditor";
-import { User } from "./interfaces/User";
 import { ContactsEditor } from "./components/ContactsEditor";
-import { Contact } from "./interfaces/Contact";
-import { GetUserProfilePath, SaveUser, USER_PROFILE_BASE_DIR, VerifyUserProfilesDirectoryExists } from "./utils/user_utils";
-import { renameFile } from "@tauri-apps/api/fs";
 import { DecryptEditor } from "./components/DecryptEditor";
+import { PackagingEditor } from "./components/PackagingEditor";
 import { SideBarView } from "./components/SideBarView";
+import { UserEditor } from "./components/UserEditor";
+import { Contact } from "./interfaces/Contact";
+import { User } from "./interfaces/User";
+import { GetUserProfilePath, SaveUser, USER_PROFILE_BASE_DIR, VerifyUserProfilesDirectoryExists } from "./utils/user_utils";
 
 function App() {
   const [userProfile, setUserProfile] = useState<User>();

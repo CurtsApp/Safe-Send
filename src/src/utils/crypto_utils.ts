@@ -108,7 +108,7 @@ export function GenerateAesPasswordKeyNewSalt(password: string) {
                 key,
                 salt
             });
-        })
+        }).catch(() => reject())
     })
 
 }
