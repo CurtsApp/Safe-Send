@@ -11,10 +11,13 @@ import { NotificationCore } from "./Notification";
 interface PackagingEditorProps {
     user: User | undefined,
     sendNotification: (newNotification: NotificationCore) => void;
+
+    inputFiles: string[];
+    setInputFiles: (updatedInputFiles: string[]) => void;
 }
 
 export function PackagingEditor(props: PackagingEditorProps) {
-    const [inputFiles, setInputFiles] = useState<string[]>([]);
+    const {inputFiles, setInputFiles} = props;
     const [selectedContacts, setSelectedContacts] = useState<number[]>([]);
 
     const noFilesSelected = !inputFiles || inputFiles.length === 0;

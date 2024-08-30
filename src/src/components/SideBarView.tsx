@@ -1,32 +1,30 @@
-import { useState } from "react";
 
 interface SideBarViewProps {
     tabs: string[];
     tabViews: (JSX.Element | undefined)[];
     contextIcon?: JSX.Element;
     pressIconSetsTabToIdx?: number;
-    initalTabIdx?: number;
-    lockToTab?: number;
+    selTabIdx: number;
+    lockToTab?: boolean;
+
+    setSelTabIdx: (newTabIdx: number) => void;
 }
 
-export function SideBarView(props: SideBarViewProps) {
-    const [selTabIdxState, setSelTabIdx] = useState(props.initalTabIdx === undefined ? 0 : props.initalTabIdx);
-
-    const isTabLocked = props.lockToTab !== undefined;
-    let selTabIdx = props.lockToTab !== undefined ? props.lockToTab : selTabIdxState;
+export function SideBarView(props: SideBarViewProps) {  
+    const isTabLocked = props.lockToTab !== undefined && props.lockToTab;
 
     return (
         <div className="sidebarViewContainer">
             <div className="sidebar">
                 <div className="column">
-                    <div onClick={() => props.pressIconSetsTabToIdx !== undefined ? setSelTabIdx(props.pressIconSetsTabToIdx) : null}>
+                    <div onClick={() => props.pressIconSetsTabToIdx !== undefined && !isTabLocked ? props.setSelTabIdx(props.pressIconSetsTabToIdx) : null}>
                         {props.contextIcon}
                     </div>
                     {getTabs()}
                 </div>
             </div>
             <div className="sidebarView">
-                {props.tabViews[selTabIdx]}
+                {props.tabViews[props.selTabIdx]}
             </div>
         </div>
     )
@@ -34,9 +32,9 @@ export function SideBarView(props: SideBarViewProps) {
     function getTabs() {
         return props.tabs.map((tab, idx) => {
             return (
-                <div key={idx} id={tab} className={`${idx === selTabIdx ? "selected" : undefined} ${isTabLocked ? "disabled" : "interactiveText"}`} onClick={() => {
+                <div key={idx} id={tab} className={`${idx === props.selTabIdx ? "selected" : undefined} ${isTabLocked ? "disabled" : "interactiveText"}`} onClick={() => {
                     if(!isTabLocked) {
-                        setSelTabIdx(idx)
+                        props.setSelTabIdx(idx)
                     }                    
                 }}>
                     {tab}

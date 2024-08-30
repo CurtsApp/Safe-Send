@@ -10,19 +10,100 @@ import { UserEditor } from "./components/UserEditor";
 import { Contact } from "./interfaces/Contact";
 import { User } from "./interfaces/User";
 import { GetUserProfilePath, SaveUser, USER_PROFILE_BASE_DIR, VerifyUserProfilesDirectoryExists } from "./utils/user_utils";
+import { listen } from "@tauri-apps/api/event";
+import { getExtensionFromPath } from "./utils/general_utils";
+import { ImportContact } from "./utils/contact_utils";
 
 function App() {
   const [userProfile, setUserProfile] = useState<User>();
+  const userProfileRef = useRef<User | undefined>(userProfile);
   const [activeNotifications, setActiveNotifications] = useState<{ core: NotificationCore; id: string; }[]>([]);
   const activeNotificationsRef = useRef<{ core: NotificationCore; id: string; }[]>(activeNotifications);
   const [onScreenNotifications, setOnScreenNotifications] = useState<Set<string>>(new Set<string>());
   const onScreenNotificationsRef = useRef<Set<string>>(onScreenNotifications);
 
+  // Selected files for encrypt and decrypt views
+  const [inputFiles, setInputFiles] = useState<string[]>([]);
+
+  // Sidebar navigation selection state, starts on User Profile view
+  const [selTabIdx, setSelTabIdx] = useState(2);
+
+  const updateContacts = (newContacts: Contact[]) => {
+    if (userProfile !== undefined) {
+      updateUser({ ...userProfile, contacts: newContacts });
+    }
+  };
+
   useEffect(() => {
-    // Set up references so current state can be accessed inside timeout closures
+    // Set up references so current state can be accessed inside timeout & drop closures
     activeNotificationsRef.current = activeNotifications;
     onScreenNotificationsRef.current = onScreenNotifications;
-  }, [activeNotifications, onScreenNotifications]);
+    userProfileRef.current = userProfile;
+  }, [activeNotifications, onScreenNotifications, userProfile]);
+
+  useEffect(() => {
+    // Run only once
+    const unlisten = listen('tauri://file-drop', event => {
+      // Override global state to ensure it is up to date
+      const userProfile = userProfileRef.current;
+
+      const files = event.payload as string[];
+
+      const encryptedFiles: string[] = [];
+      const contactFiles: string[] = [];
+      const userProfiles: string[] = [];
+      const otherFiles: string[] = [];
+
+      // Don't allow drag and drop until sign in
+      if (userProfile === undefined) {
+        sendNotification({
+          msg: "Sign in required",
+          type: "fail"
+        });
+        return;
+      }
+
+      // Sort dropped files by file type
+      files.forEach(filePath => {
+        const extension = getExtensionFromPath(filePath);
+
+        if (extension === "ef") {
+          encryptedFiles.push(filePath);
+        } else if (extension === "ssc") {
+          contactFiles.push(filePath);
+        } else if (extension === "up") {
+          userProfiles.push(filePath);
+        } else {
+          otherFiles.push(filePath);
+        }
+      });
+
+      // Only process one file type at a time, if any are found ignore the rest
+      if (encryptedFiles.length > 0) {
+        setInputFiles(encryptedFiles);
+        setSelTabIdx(1);
+      } else if (contactFiles.length > 0) {
+        setSelTabIdx(3);
+        ImportContact(contactFiles, userProfile?.contacts, updateContacts, sendNotification);
+      } else if (userProfiles.length > 0) {
+        // Importing user profile via drag and drop is not currently supported
+        sendNotification({
+          msg: "Sign out to import a user profile",
+          type: "fail"
+        })
+      } else if (otherFiles.length > 0) {
+        setInputFiles(otherFiles);
+        setSelTabIdx(0);
+      }
+    });
+
+    // Unmount listener when component unmounts
+    return () => {
+      unlisten.then(f => f());
+    }
+  }, []);
+
+
 
   const updateUser = (newUser: User | undefined) => {
     if (newUser === undefined) {
@@ -94,14 +175,11 @@ function App() {
     }
   }
 
+
   const manageProfileView = <UserEditor user={userProfile} updateUser={updateUser} sendNotification={sendNotification}></UserEditor>;
-  const packageFileView = <PackagingEditor user={userProfile} sendNotification={sendNotification}></PackagingEditor>
-  const decryptFileView = <DecryptEditor user={userProfile} sendNotification={sendNotification}></DecryptEditor>
-  const contactsView = <ContactsEditor user={userProfile} sendNotification={sendNotification} updateContacts={(newContacts: Contact[]) => {
-    if (userProfile !== undefined) {
-      updateUser({ ...userProfile, contacts: newContacts });
-    }
-  }}></ContactsEditor>
+  const packageFileView = <PackagingEditor user={userProfile} sendNotification={sendNotification} inputFiles={inputFiles} setInputFiles={setInputFiles}></PackagingEditor>
+  const decryptFileView = <DecryptEditor user={userProfile} sendNotification={sendNotification} inputFiles={inputFiles} setInputFiles={setInputFiles}></DecryptEditor>
+  const contactsView = <ContactsEditor user={userProfile} sendNotification={sendNotification} updateContacts={updateContacts}></ContactsEditor>
 
   let userName = userProfile ? userProfile.name : "Sign in"
   const contextIcon = <div className="interactiveText" style={{ width: "100%", justifyContent: "center" }}>{userName}</div>
@@ -118,8 +196,9 @@ function App() {
         ]}
         contextIcon={contextIcon}
         pressIconSetsTabToIdx={2}
-        initalTabIdx={2}
-        lockToTab={userProfile === undefined ? 2 : undefined}
+        selTabIdx={selTabIdx}
+        lockToTab={userProfile === undefined}
+        setSelTabIdx={setSelTabIdx}
       />
       <div style={{ position: "absolute" }}>
         {activeNotifications.map((notification, idx) => {

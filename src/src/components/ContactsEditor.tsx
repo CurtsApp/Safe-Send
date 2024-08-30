@@ -2,7 +2,7 @@ import { ask, open, save } from "@tauri-apps/api/dialog";
 import { useState } from "react";
 import { Contact } from "../interfaces/Contact";
 import { User } from "../interfaces/User";
-import { ExportContact, GetContactFromPath } from "../utils/contact_utils";
+import { ExportContact, GetContactFromPath, ImportContact } from "../utils/contact_utils";
 import { getFirstString, stringSort } from "../utils/general_utils";
 import { GetContactFromUser } from "../utils/user_utils";
 import { LabeledInputField } from "./LabeledInputField";
@@ -45,20 +45,7 @@ export function ContactsEditor(props: ContactsEditorProps) {
         const selected = await open({ title: "Import Contact", filters: [{ extensions: ["ssc"], name: "Safe Send Contact" }] });
         let path = getFirstString(selected);
         if (path) {
-            GetContactFromPath(path).then(newContact => {
-                contacts.push(newContact);
-                contacts.sort((a, b) => {
-                    return stringSort(a.name, b.name);
-                })
-                props.updateContacts(contacts);
-            }).catch(() => {
-                props.sendNotification(
-                    {
-                        msg: `Failed to import contact: ${path}`,
-                        type: "fail"
-                    }
-                );
-            })
+            ImportContact([path], contacts, props.updateContacts, props.sendNotification);
         }
     };
 

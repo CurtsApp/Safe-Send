@@ -13,10 +13,13 @@ import { NotificationCore } from "./Notification";
 interface DecryptEditorProps {
     user: User | undefined,
     sendNotification: (newNotification: NotificationCore) => void;
+
+    inputFiles: string[];
+    setInputFiles: (updatedInputFiles: string[]) => void;
 }
 
 export function DecryptEditor(props: DecryptEditorProps) {
-    const [inputFiles, setInputFiles] = useState<string[]>([]);
+    const {inputFiles, setInputFiles} = props;
     const [selectedContact, setselectedContact] = useState<number | undefined>(undefined);
 
     const noFilesSelected = !inputFiles || inputFiles.length === 0;

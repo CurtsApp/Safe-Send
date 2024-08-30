@@ -1,3 +1,5 @@
+import { sep } from "@tauri-apps/api/path";
+
 export function stringSort(a: string | undefined, b: string | undefined) {
     if (a === undefined) {
         return -1;
@@ -22,6 +24,29 @@ export function getFirstString(str: string | string[] | null) {
         firstStr = str;
     }
     return firstStr;
+}
+
+export function getFileName(path: string) {
+    let pathSplit = path.split(sep);
+    let fileName = "";
+    if (pathSplit.length > 0) {
+        fileName = pathSplit[pathSplit.length - 1];
+    }
+    return fileName;
+}
+
+export function getFileExtension(fileName: string) {
+    let fileNameSplit = fileName.split(".");
+    let extension = "";
+    if(fileNameSplit.length > 1) {
+        extension = fileNameSplit[fileNameSplit.length - 1];
+    } 
+
+    return extension;
+}
+
+export function getExtensionFromPath(path: string) {
+    return getFileExtension(getFileName(path));
 }
 
 export function getUint32FromOffset(data: Uint8Array, offset: number) {

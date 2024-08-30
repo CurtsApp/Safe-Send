@@ -114,7 +114,7 @@ export function UserEditor(props: UserEditorProps) {
                     />
 
                     <div className="row">
-                        <button onClick={() => exportUserProfile()}>Share Profile</button>
+                        <button onClick={() => exportUserProfile()}>Back Up Profile</button>
                         <button onClick={() => logOut()}>Sign Out</button>
                         <button className="danger" onClick={() => deleteCurrentProfile()}>Delete Profile</button>
                     </div>
@@ -254,14 +254,14 @@ export function UserEditor(props: UserEditorProps) {
             SaveUser(props.user, path).then(() => {
                 props.sendNotification(
                     {
-                        msg: `Profile shared`,
+                        msg: `Profile backed up`,
                         type: "success"
                     }
                 );
             }).catch(() => {
                 props.sendNotification(
                     {
-                        msg: `Failed to share profile: ${props.user?.name}`,
+                        msg: `Failed to back up profile: ${props.user?.name}`,
                         type: "fail"
                     }
                 );
