@@ -17,7 +17,7 @@ export function ContactsEditor(props: ContactsEditorProps) {
     const [searchQuery, setSearchQuery] = useState("");
 
     if (!props.user) {
-        return <div>Please log in</div>;
+        return <div>Please sign in</div>;
     }
 
     // Updating the user will trigger re-render, so this isn't state

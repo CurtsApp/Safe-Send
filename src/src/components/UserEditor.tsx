@@ -83,7 +83,7 @@ export function UserEditor(props: UserEditorProps) {
                                         onPasswordEntry(password)
                                     }
                                     e.preventDefault();
-                                }}>Submit</button>
+                                }}>Sign In</button>
                         </div>
                     </form>
                 </dialog>
@@ -116,7 +116,7 @@ export function UserEditor(props: UserEditorProps) {
 
                     <div className="row">
                         <button onClick={() => exportUserProfile()}>Share Profile</button>
-                        <button onClick={() => logOut()}>Log Out</button>
+                        <button onClick={() => logOut()}>Sign Out</button>
                         <button className="danger" onClick={() => deleteCurrentProfile()}>Delete Profile</button>
                     </div>
 
@@ -137,15 +137,14 @@ export function UserEditor(props: UserEditorProps) {
                     hidePasswordPrompt();
                     props.sendNotification(
                         {
-                            msg: `Logged In`,
+                            msg: `Signed In`,
                             type: "success"
                         }
                     );
                 } else {
-                    //message(`Unable to log in to ${userName}`);
                     props.sendNotification(
                         {
-                            msg: `Unable to log in to ${userName} ${password}`,
+                            msg: `Sign in failed`,
                             type: "fail"
                         }
                     );
@@ -153,16 +152,15 @@ export function UserEditor(props: UserEditorProps) {
             }).catch(() => {
                 props.sendNotification(
                     {
-                        msg: `Unable to log in to ${userName} ${password}`,
+                        msg: `Sign in failed`,
                         type: "fail"
                     }
                 );
             })
         } else {
-            message(`Unable to log in to ${userName}`);
             props.sendNotification(
                 {
-                    msg: `Unable to log in to ${userName}`,
+                    msg: `Sign in failed: No user provided`,
                     type: "fail"
                 }
             );
@@ -189,6 +187,13 @@ export function UserEditor(props: UserEditorProps) {
 
                 Promise.all([signingKey, encryptKey, profileEncryptionKey]).then((values) => {
                     updateUserData({ name: "New User", note: "", encryptionKeys: values[1], signingKeys: values[0], contacts: [], userDataEncryptionKey: values[2].key, profileSalt: values[2].salt });
+                }).catch(() => {
+                    props.sendNotification(
+                        {
+                            msg: `New User Profile Generation Failed`,
+                            type: "fail"
+                        }
+                    );
                 });
             }
         )
@@ -210,12 +215,24 @@ export function UserEditor(props: UserEditorProps) {
             showPasswordPrompt(
                 "New User",
                 (password) => {
-                    GetUserFromPath(path, password).then(async user => {
+                    GetUserFromPath(path, password).then(user => {
                         if (user) {
                             updateUserData(user);
                         } else {
-                            dialog.message(`Failed to import user profile: ${path}`)
+                            props.sendNotification(
+                                {
+                                    msg: `Failed to import user profile: ${path}`,
+                                    type: "fail"
+                                }
+                            );
                         }
+                    }).catch(() => {
+                        props.sendNotification(
+                            {
+                                msg: `Failed to import user profile: ${path}`,
+                                type: "fail"
+                            }
+                        );
                     })
                 }
             )
@@ -235,7 +252,14 @@ export function UserEditor(props: UserEditorProps) {
         });
 
         if (path && props.user) {
-            SaveUser(props.user, path);
+            SaveUser(props.user, path).catch(() => {
+                props.sendNotification(
+                    {
+                        msg: `Failed to save user profile: ${props.user?.name}`,
+                        type: "fail"
+                    }
+                );
+            });
         }
     }
 

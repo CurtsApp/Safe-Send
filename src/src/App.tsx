@@ -103,7 +103,7 @@ function App() {
     }
   }}></ContactsEditor>
 
-  let userName = userProfile ? userProfile.name : "Log in"
+  let userName = userProfile ? userProfile.name : "Sign in"
   const contextIcon = <div className="interactiveText" style={{ width: "100%", justifyContent: "center" }}>{userName}</div>
 
   return (
