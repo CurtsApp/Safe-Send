@@ -205,6 +205,17 @@ export function UserEditor(props: UserEditorProps) {
         showPasswordPrompt(
             "New User",
             (password) => {
+                // Require password length of 12 characters
+                if(password.length < 12) {
+                    props.sendNotification(
+                        {
+                            msg: `Password minimum length is 12 characters`,
+                            type: "fail"
+                        }
+                    );
+                    return;
+                }
+
                 let signingKey = GenerateSigningKey();
                 let encryptKey = GenerateEncryptionKey();
                 let profileEncryptionKey = GenerateAesPasswordKeyNewSalt(password);
