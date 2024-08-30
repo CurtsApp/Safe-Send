@@ -1,4 +1,4 @@
-import { message, open, save } from "@tauri-apps/api/dialog";
+import { open, save } from "@tauri-apps/api/dialog";
 import { useState } from "react";
 import { Contact } from "../interfaces/Contact";
 import { User } from "../interfaces/User";
@@ -6,9 +6,11 @@ import { EncryptFile } from "../utils/crypto_utils";
 import { EFFormat } from "../utils/key_utils";
 import { GetContactFromUser } from "../utils/user_utils";
 import { LabeledOutlineContainer } from "./LabeledOutlineContainer";
+import { NotificationCore } from "./Notification";
 
 interface PackagingEditorProps {
     user: User | undefined,
+    sendNotification: (newNotification: NotificationCore) => void;
 }
 
 export function PackagingEditor(props: PackagingEditorProps) {
@@ -20,10 +22,14 @@ export function PackagingEditor(props: PackagingEditorProps) {
 
     const encryptSelFiles = async () => {
         if (noFilesSelected || !props.user?.encryptionKeys) {
+            props.sendNotification(
+                {
+                    msg: `No files selected`,
+                    type: "fail"
+                }
+            );
             return;
         }
-
-
 
         if (props.user) {
             // @ts-ignore
@@ -52,8 +58,21 @@ export function PackagingEditor(props: PackagingEditorProps) {
                 });
 
                 if (path) {
-                    EncryptFile(EFFormat.V0, file, path, contactsToEncryptFor, props.user).catch(() => {
-                        message(`Unable to encrypt ${file}`);
+                    EncryptFile(EFFormat.V0, file, path, contactsToEncryptFor, props.user).then(() => {
+                        props.sendNotification(
+                            {
+                                msg: `Encryption successful`,
+                                type: "success"
+                            }
+                        )
+                    }
+                    ).catch(() => {
+                        props.sendNotification(
+                            {
+                                msg: `Encryption failed: ${file}`,
+                                type: "fail"
+                            }
+                        );
                     });
                 }
             }

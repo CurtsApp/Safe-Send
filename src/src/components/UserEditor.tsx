@@ -1,5 +1,4 @@
-import { dialog } from "@tauri-apps/api";
-import { ask, message, open, save } from "@tauri-apps/api/dialog";
+import { ask, open, save } from "@tauri-apps/api/dialog";
 import { FileEntry, readDir } from "@tauri-apps/api/fs";
 import { useRef, useState } from "react";
 import { User } from "../interfaces/User";
@@ -252,10 +251,17 @@ export function UserEditor(props: UserEditorProps) {
         });
 
         if (path && props.user) {
-            SaveUser(props.user, path).catch(() => {
+            SaveUser(props.user, path).then(() => {
                 props.sendNotification(
                     {
-                        msg: `Failed to save user profile: ${props.user?.name}`,
+                        msg: `Profile shared`,
+                        type: "success"
+                    }
+                );
+            }).catch(() => {
+                props.sendNotification(
+                    {
+                        msg: `Failed to share profile: ${props.user?.name}`,
                         type: "fail"
                     }
                 );

@@ -1,4 +1,4 @@
-import { message, open, save } from "@tauri-apps/api/dialog";
+import { ask, open, save } from "@tauri-apps/api/dialog";
 import { writeBinaryFile } from "@tauri-apps/api/fs";
 import { sep } from "@tauri-apps/api/path";
 import { useState } from "react";
@@ -8,9 +8,11 @@ import { DecryptFile } from "../utils/crypto_utils";
 import { EFFormat } from "../utils/key_utils";
 import { GetContactFromUser } from "../utils/user_utils";
 import { LabeledOutlineContainer } from "./LabeledOutlineContainer";
+import { NotificationCore } from "./Notification";
 
 interface DecryptEditorProps {
     user: User | undefined,
+    sendNotification: (newNotification: NotificationCore) => void;
 }
 
 export function DecryptEditor(props: DecryptEditorProps) {
@@ -22,6 +24,12 @@ export function DecryptEditor(props: DecryptEditorProps) {
 
     const decryptSelFiles = () => {
         if (noFilesSelected || !props.user?.encryptionKeys) {
+            props.sendNotification(
+                {
+                    msg: `No files selected`,
+                    type: "fail"
+                }
+            );
             return;
         }
 
@@ -29,26 +37,52 @@ export function DecryptEditor(props: DecryptEditorProps) {
             if (props.user && selectedContact !== undefined) {
                 let contactsToDecryptFor = selectedContact === 0 ? GetContactFromUser(props.user) : props.user.contacts[selectedContact - 1];
 
-                DecryptFile(EFFormat.V0, file, contactsToDecryptFor, props.user).then(async (fileDetails) => {
-                    let splitPath = file.split(sep);
-                    // Remove file name
-                    splitPath = splitPath.splice(-1);
-                    // Add new file name
-                    splitPath.push(fileDetails.fileName);
-                    const pathToNewFile = splitPath.join(sep);
+                DecryptFile(EFFormat.V0, file, contactsToDecryptFor, props.user).then((fileDetails) => {
+                    const saveDecryptedFile = () => {
+                        let splitPath = file.split(sep);
+                        // Remove file name
+                        splitPath = splitPath.splice(-1);
+                        // Add new file name
+                        splitPath.push(fileDetails.fileName);
+                        const pathToNewFile = splitPath.join(sep);
 
-                    const path = await save({
-                        title: `Decrypting ${file}`,
-                        defaultPath: pathToNewFile
-                    });
-
-                    if (path) {
-                        writeBinaryFile(path, fileDetails.decryptedFile);
+                        save({
+                            title: `Decrypting ${file}`,
+                            defaultPath: pathToNewFile
+                        }).then(path => {
+                            if (path) {
+                                writeBinaryFile(path, fileDetails.decryptedFile).then(() => {
+                                    props.sendNotification(
+                                        {
+                                            msg: `Decryption successful`,
+                                            type: "success"
+                                        }
+                                    );
+                                });
+                            }
+                        });
                     }
 
-                }).catch(() => {
-                    // TODO give distinct error for unable to decrypt and invalid signatures
-                    message(`Unable to decrypt ${file}`);
+
+                    if (fileDetails.passedSignatureValidation) {
+                        saveDecryptedFile();
+                    } else {
+                        // TODO give distinct error for when the signatures mismatch too
+                        ask(`Decrypted file ${fileDetails.fileName} was not encrypted by ${contactsToDecryptFor.name} do you still want to save the file?`,
+                            { okLabel: "Save Potentially Unsafe File", cancelLabel: "Cancel", title: `Warning: File Encrypted By Unexpected Sender` })
+                            .then(confirmed => {
+                                if (confirmed) {
+                                    saveDecryptedFile();
+                                }
+                            });
+                    }
+                }).catch(() => {                    
+                    props.sendNotification(
+                        {
+                            msg: `Decryption failed: ${file}`,
+                            type: "fail"
+                        }
+                    );
                 })
             }
         });

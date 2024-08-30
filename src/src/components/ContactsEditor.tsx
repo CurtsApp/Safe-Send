@@ -1,16 +1,18 @@
-import { ask, message, open, save } from "@tauri-apps/api/dialog";
+import { ask, open, save } from "@tauri-apps/api/dialog";
+import { useState } from "react";
 import { Contact } from "../interfaces/Contact";
 import { User } from "../interfaces/User";
 import { ExportContact, GetContactFromPath } from "../utils/contact_utils";
 import { getFirstString, stringSort } from "../utils/general_utils";
 import { GetContactFromUser } from "../utils/user_utils";
-import { LabeledOutlineContainer } from "./LabeledOutlineContainer";
 import { LabeledInputField } from "./LabeledInputField";
-import { useState } from "react";
+import { LabeledOutlineContainer } from "./LabeledOutlineContainer";
+import { NotificationCore } from "./Notification";
 
 interface ContactsEditorProps {
     user: User | undefined;
     updateContacts: (newContacts: Contact[]) => void;
+    sendNotification: (newNotification: NotificationCore) => void;
 }
 
 export function ContactsEditor(props: ContactsEditorProps) {
@@ -49,14 +51,28 @@ export function ContactsEditor(props: ContactsEditorProps) {
                     return stringSort(a.name, b.name);
                 })
                 props.updateContacts(contacts);
-            }).catch(() => message(`Failed to import contact: ${path}`))
+            }).catch(() => {
+                props.sendNotification(
+                    {
+                        msg: `Failed to import contact: ${path}`,
+                        type: "fail"
+                    }
+                );
+            })
         }
     };
 
     const handleExportContact = async (contact: Contact) => {
         const path = await save({ defaultPath: contact.name, title: "Share My Contact", filters: [{ extensions: ["ssc"], name: "Safe Send Contact" }] });
         if (path) {
-            ExportContact(contact, path);
+            ExportContact(contact, path).then(() => {
+                props.sendNotification(
+                    {
+                        msg: `Contact shared`,
+                        type: "success"
+                    }
+                );
+            });
         }
     };
 

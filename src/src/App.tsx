@@ -95,9 +95,9 @@ function App() {
   }
 
   const manageProfileView = <UserEditor user={userProfile} updateUser={updateUser} sendNotification={sendNotification}></UserEditor>;
-  const packageFileView = <PackagingEditor user={userProfile}></PackagingEditor>
-  const decryptFileView = <DecryptEditor user={userProfile}></DecryptEditor>
-  const contactsView = <ContactsEditor user={userProfile} updateContacts={(newContacts: Contact[]) => {
+  const packageFileView = <PackagingEditor user={userProfile} sendNotification={sendNotification}></PackagingEditor>
+  const decryptFileView = <DecryptEditor user={userProfile} sendNotification={sendNotification}></DecryptEditor>
+  const contactsView = <ContactsEditor user={userProfile} sendNotification={sendNotification} updateContacts={(newContacts: Contact[]) => {
     if (userProfile !== undefined) {
       updateUser({ ...userProfile, contacts: newContacts });
     }

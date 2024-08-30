@@ -169,7 +169,6 @@ export async function EF_V0_DecryptFile(binInputFile: Uint8Array, expectedSender
                 },
                 true,
                 ["encrypt", "decrypt"]
-
             ));
         }
 
