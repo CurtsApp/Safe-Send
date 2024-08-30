@@ -8,10 +8,12 @@ import { getFirstString, stringSort } from "../utils/general_utils";
 import { DeleteFile, GetUserFromPath, GetUserProfilePath, SaveUser, USER_PROFILE_BASE_DIR, USER_PROFILE_DIR } from "../utils/user_utils";
 import { LabeledInputField } from "./LabeledInputField";
 import { LabeledOutlineContainer } from "./LabeledOutlineContainer";
+import { NotificationCore } from "./Notification";
 
 interface UserEditorProps {
     user: User | undefined,
     updateUser: (user: User | undefined) => void;
+    sendNotification: (newNotification: NotificationCore) => void;
 }
 
 export function UserEditor(props: UserEditorProps) {
@@ -76,10 +78,11 @@ export function UserEditor(props: UserEditorProps) {
                             <button onClick={() => hidePasswordPrompt()}>Cancel</button>
                             <button
                                 type="submit"
-                                onClick={() => {
+                                onClick={(e) => {
                                     if (onPasswordEntry) {
                                         onPasswordEntry(password)
                                     }
+                                    e.preventDefault();
                                 }}>Submit</button>
                         </div>
                     </form>
@@ -132,12 +135,37 @@ export function UserEditor(props: UserEditorProps) {
                     user.name = userName;
                     props.updateUser(user);
                     hidePasswordPrompt();
+                    props.sendNotification(
+                        {
+                            msg: `Logged In`,
+                            type: "success"
+                        }
+                    );
                 } else {
-                    message(`Unable to log in to ${userName}`);
+                    //message(`Unable to log in to ${userName}`);
+                    props.sendNotification(
+                        {
+                            msg: `Unable to log in to ${userName} ${password}`,
+                            type: "fail"
+                        }
+                    );
                 }
+            }).catch(() => {
+                props.sendNotification(
+                    {
+                        msg: `Unable to log in to ${userName} ${password}`,
+                        type: "fail"
+                    }
+                );
             })
         } else {
             message(`Unable to log in to ${userName}`);
+            props.sendNotification(
+                {
+                    msg: `Unable to log in to ${userName}`,
+                    type: "fail"
+                }
+            );
         }
     }
 

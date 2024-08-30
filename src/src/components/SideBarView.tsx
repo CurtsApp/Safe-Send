@@ -34,7 +34,7 @@ export function SideBarView(props: SideBarViewProps) {
     function getTabs() {
         return props.tabs.map((tab, idx) => {
             return (
-                <div id={tab} className={`${idx === selTabIdx ? "selected" : undefined} ${isTabLocked ? "disabled" : "interactiveText"}`} onClick={() => {
+                <div key={idx} id={tab} className={`${idx === selTabIdx ? "selected" : undefined} ${isTabLocked ? "disabled" : "interactiveText"}`} onClick={() => {
                     if(!isTabLocked) {
                         setSelTabIdx(idx)
                     }                    

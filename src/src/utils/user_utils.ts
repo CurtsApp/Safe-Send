@@ -76,7 +76,9 @@ export function GetUserFromPath(path: string, password: string, fsOptions?: FsOp
                 },
                 aesKey,
                 encryptedUserData
-            );
+            ).catch(() => {
+                reject();
+            });
 
             if (!decryptedUserData) {
                 // Password invalid

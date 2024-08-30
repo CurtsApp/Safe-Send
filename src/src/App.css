@@ -354,3 +354,26 @@ button {
     max-width: 1200px;
   }
 }
+
+.notificationPill {
+  padding: 1.2em;
+  border-top-left-radius: 25px;
+  border-bottom-left-radius: 25px;
+  color: #fafafa;
+  -webkit-transition: all 0.2s;
+  transition: all 0.2s ease-out;
+  overflow-x: hidden;
+  transform: translateX(100%);
+}
+
+.notificationPill.success {
+  background-color: rgb(16, 149, 20);
+}
+
+.notificationPill.fail {
+  background-color: rgb(200, 53, 53);
+}
+
+.notificationPill.onScreen {
+  transform: translateX(0%) !important;
+}
