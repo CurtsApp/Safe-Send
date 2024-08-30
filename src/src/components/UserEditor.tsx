@@ -1,6 +1,6 @@
 import { ask, open, save } from "@tauri-apps/api/dialog";
 import { FileEntry, readDir } from "@tauri-apps/api/fs";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { User } from "../interfaces/User";
 import { GenerateAesPasswordKeyNewSalt, GenerateEncryptionKey, GenerateSigningKey } from "../utils/crypto_utils";
 import { getFirstString, stringSort } from "../utils/general_utils";
@@ -20,9 +20,17 @@ export function UserEditor(props: UserEditorProps) {
     const [profilesUpdating, setProfilesUpdating] = useState(false);
     const [passwordPromptTitle, setPasswordPromptTitle] = useState("");
     const [password, setPassword] = useState("");
+    const passwordRef = useRef<string>(password);
     const [onPasswordEntry, setOnPasswordEntry] = useState<(password: string) => void>();
+    const onPasswordEntryRef = useRef<((password: string) => void) | undefined>(onPasswordEntry);
     const importProfileButton = <button onClick={() => importUserProfile()}>Import Profile</button>;
     const dialogRef = useRef<HTMLDialogElement | null>(null);
+
+    useEffect(() => {
+        // Set up references so current state can be accessed inside timeout & drop closures
+        onPasswordEntryRef.current = onPasswordEntry;
+        passwordRef.current = password;
+    }, [onPasswordEntry, password]);
 
     const showPasswordPrompt = (title: string, onPasswordEntry: (password: string) => void) => {
         setPasswordPromptTitle(title);
@@ -34,6 +42,23 @@ export function UserEditor(props: UserEditorProps) {
     const hidePasswordPrompt = () => {
         dialogRef?.current?.close();
     }
+
+    useEffect(() => {
+        // Run only once
+        const keyUpListener = (e: any) => {
+            if (e.key === "Enter") {
+                if (onPasswordEntryRef.current && dialogRef?.current?.open) {
+                    onPasswordEntryRef.current(passwordRef.current)
+                }
+            }
+        };
+        window.addEventListener("keyup", keyUpListener);
+
+        // Unmount listener when component unmounts
+        return () => {
+            window.removeEventListener("keyup", keyUpListener);
+        }
+    }, []);
 
     if (!profilesUpdating) {
         setProfilesUpdating(true);
@@ -65,7 +90,7 @@ export function UserEditor(props: UserEditorProps) {
                     {importProfileButton}
                 </div>
                 <dialog ref={dialogRef}>
-                    <form className="column">
+                    <div className="column">
                         <div style={{ textAlign: "center" }}>{passwordPromptTitle}</div>
                         <LabeledInputField
                             fieldValue={password}
@@ -76,15 +101,15 @@ export function UserEditor(props: UserEditorProps) {
                         <div className="row">
                             <button onClick={() => hidePasswordPrompt()}>Cancel</button>
                             <button
-                                type="submit"
-                                onClick={(e) => {
+                                type="button"
+                                onClick={() => {
                                     if (onPasswordEntry) {
                                         onPasswordEntry(password)
                                     }
-                                    e.preventDefault();
-                                }}>Sign In</button>
+                                }}
+                            >Sign In</button>
                         </div>
-                    </form>
+                    </div>
                 </dialog>
             </div>
         )
