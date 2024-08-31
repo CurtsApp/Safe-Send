@@ -83,3 +83,13 @@ export function decodeBytesToJSON(input: Uint8Array, offset: number, length: num
 export function hasAllKeys<T>(obj: any, keys: Array<keyof T>): obj is T {
     return keys.every(key => key in obj);
 }
+
+export function ReplaceFileExtension(fileName: string, newExtension: string) {
+    const pathSplit = fileName.split(".");
+    if(pathSplit.length === 1) {
+        // No extension, new default
+        return `${fileName}.${newExtension}`;
+    } else {
+        return `${pathSplit[0]}.${newExtension}`;
+    }
+}

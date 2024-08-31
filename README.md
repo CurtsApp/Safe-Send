@@ -16,7 +16,7 @@ Modern communication platforms come with many conveniences and features at the c
 4. The file sender encrypts the file after selected all of their contacts they want to be able to open it
    - Files can be encrypted for yourself
    - Files can be encrypted for multiple contacts. A single file is generated that all of the selected contacts can decrypt.
-5. The file sender sends the encrypted file (.ef file) to the receiver over any established communication platform
+5. The file sender sends the encrypted file (.sf file) to the receiver over any established communication platform
 6. The receiver decrypts the file, selecting sender as the expected sender of the file will verify the file was created by them.
 
 ## Security

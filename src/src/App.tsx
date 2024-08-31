@@ -67,7 +67,7 @@ function App() {
       files.forEach(filePath => {
         const extension = getExtensionFromPath(filePath);
 
-        if (extension === "ef") {
+        if (extension === "sf") {
           encryptedFiles.push(filePath);
         } else if (extension === "ssc") {
           contactFiles.push(filePath);

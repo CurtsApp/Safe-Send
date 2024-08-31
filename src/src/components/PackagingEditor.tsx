@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Contact } from "../interfaces/Contact";
 import { User } from "../interfaces/User";
 import { EncryptFile } from "../utils/crypto_utils";
+import { getFileName, ReplaceFileExtension } from "../utils/general_utils";
 import { EFFormat } from "../utils/key_utils";
 import { GetContactFromUser } from "../utils/user_utils";
 import { LabeledOutlineContainer } from "./LabeledOutlineContainer";
@@ -50,11 +51,13 @@ export function PackagingEditor(props: PackagingEditorProps) {
 
             for (const i in inputFiles) {
                 const file = inputFiles[i];
-                const path = await save({
+                const fileName = ReplaceFileExtension(getFileName(file), "sf");
+                let path = await save({
+                    defaultPath: fileName,
                     filters: [
                         {
                             name: 'Safe File',
-                            extensions: ["ef"],
+                            extensions: ["sf"],
                         },
                     ],
                     title: `Output: Encrypting ${file}`

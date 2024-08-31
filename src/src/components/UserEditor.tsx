@@ -275,7 +275,7 @@ export function UserEditor(props: UserEditorProps) {
     }
 
     async function exportUserProfile() {
-        const path = await save({
+        let path = await save({
             filters: [
                 {
                     name: "User Profile",
@@ -283,7 +283,7 @@ export function UserEditor(props: UserEditorProps) {
                 }
             ],
             title: "Decrypted File",
-            defaultPath: props.user ? props.user.name : undefined
+            defaultPath: props.user ? `${props.user.name}.up` : undefined
         });
 
         if (path && props.user) {

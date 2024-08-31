@@ -50,7 +50,7 @@ export function ContactsEditor(props: ContactsEditorProps) {
     };
 
     const handleExportContact = async (contact: Contact) => {
-        const path = await save({ defaultPath: contact.name, title: "Share My Contact", filters: [{ extensions: ["ssc"], name: "Safe Send Contact" }] });
+        let path = await save({ defaultPath: `${contact.name}.ssc`, title: "Share My Contact", filters: [{ extensions: ["ssc"], name: "Safe Send Contact" }] });
         if (path) {
             ExportContact(contact, path).then(() => {
                 props.sendNotification(
